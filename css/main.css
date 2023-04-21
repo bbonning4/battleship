@@ -1,0 +1,81 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    margin: 30px;
+    /* font-family: */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: lightskyblue;
+}
+
+#aiboard {
+    display: grid;
+    grid-template-columns: repeat(10, 3vmin);
+    grid-template-rows: repeat(10, 3vmin);
+    grid-column-gap: 1px;
+    grid-row-gap: 1px;
+    background-color: black;
+    padding: 1px;
+    margin: 0;
+}
+
+#aiboard > div {
+    background: lightskyblue;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 10vmin;
+    
+}
+
+#aiboard > div:hover {
+    background: lightblue;
+    /* background: var(--div-bg-color); */
+}
+
+
+#playerboard {
+    display: grid;
+    grid-template-columns: repeat(10, 4vmin);
+    grid-template-rows: repeat(10, 4vmin);
+    grid-column-gap: 1px;
+    grid-row-gap: 1px;
+    background-color: black;
+    padding: 1px;
+    margin: 0;
+}
+
+#playerboard > div {
+    background: lightskyblue;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 10vmin;
+    
+}
+
+#playerboard > div:hover {
+    background: lightblue;
+    /* background: var(--div-bg-color); */
+}
+
+
+button {
+    margin-top: 1vmin;
+    padding: 2vmin;
+    font-size: 2vmin;
+    border-radius: 2vmin;
+    color: grey;
+}
+
+button:hover {
+    color: white;
+    background-color: blue;
+}
