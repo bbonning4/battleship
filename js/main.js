@@ -72,7 +72,8 @@ const $aiSquares = $('#ai-board > div').toArray();
 
 /*----- event listeners -----*/
 // $('#player-board').on('click', 'div', placeShips)
-$('#ai-board').on('click', 'div', handleShot)
+$('#ai-board').on('click', 'div', handleTurn)
+$resetBtn.on('click', init)
 
 
 /*----- functions -----*/
@@ -188,7 +189,7 @@ function placeShips() {
 
 
 
-function handleShot(evt) {
+function handleTurn(evt) {
     let coords = getXY(evt, $aiSquares)
     // 0,0 in top left corner 9,9 in bottom right
 
