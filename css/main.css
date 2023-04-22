@@ -13,7 +13,7 @@ body {
     background-color: lightskyblue;
 }
 
-#aiboard {
+#ai-board {
     display: grid;
     grid-template-columns: repeat(10, 3vmin);
     grid-template-rows: repeat(10, 3vmin);
@@ -24,7 +24,7 @@ body {
     margin: 0;
 }
 
-#aiboard > div {
+#ai-board > div {
     background: lightskyblue;
     display: flex;
     flex-direction: column;
@@ -34,13 +34,13 @@ body {
     
 }
 
-#aiboard > div:hover {
+#ai-board > div:hover {
     background: lightblue;
     /* background: var(--div-bg-color); */
 }
 
 
-#playerboard {
+#player-board {
     display: grid;
     grid-template-columns: repeat(10, 4vmin);
     grid-template-rows: repeat(10, 4vmin);
@@ -51,7 +51,7 @@ body {
     margin: 0;
 }
 
-#playerboard > div {
+#player-board > div {
     background: lightskyblue;
     display: flex;
     flex-direction: column;
@@ -61,7 +61,7 @@ body {
     
 }
 
-#playerboard > div:hover {
+#player-board > div:hover {
     background: lightblue;
     /* background: var(--div-bg-color); */
 }
