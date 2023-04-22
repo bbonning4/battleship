@@ -48,8 +48,10 @@ class Board {
     constructor() {
         this.ships = [
             [null, null],
-            [null, null],
-            [null, null]
+            [null, null, null],
+            [null, null, null],
+            [null, null, null, null],
+            [null, null, null, null, null]
         ];
         this.board = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -85,8 +87,9 @@ init()
 
 function init() {
     createBoards()
-    placeShips()
     render()
+    placeShips(playerBoard)
+    placeShips(aiBoard)
 }
 
 function render() {
@@ -140,29 +143,106 @@ function createBoards() {
 }
 
 
-function placeShips() {
+function placeShips(board) {
     let x;
     let y;
     let ogX;
     let ogY;
     let dxdy;
     let newCoords;
-    // player ships placed
-    playerBoard.ships.forEach((ship, shipIdx) => {
-        let segments = 0;
+    let segments;
+    let goBack = false;
+    
+    board.ships.forEach((ship, shipIdx) => {
+        segments = 0;
+        goBack = false;
         ship.forEach(function place(segment, idx) {
             if(segments > 1) {
-                // continue going in same direction
-                // if wall/other ship is blocking, go other direction
-                // if both directions blocked, revert values of previous squares and go in perpendicular direction
-                // if still blocked, ship can't be placed -> revert all values and place() again
-                
-            } 
+                if(goBack) {
+                    newCoords = {
+                        'x': ogX - RANDOM_DIRECTION[dxdy][0],
+                        'y': ogY - RANDOM_DIRECTION[dxdy][1] 
+                    }
+                    if(newCoords.x >= 0 && newCoords.x < 10 &&
+                       newCoords.y >= 0 && newCoords.y < 10) {
+                        if(board.board[newCoords.x][newCoords.y] === 0) {
+                            board.board[newCoords.x][newCoords.y] = 1;
+                            board.ships[shipIdx][idx] = 1;
+                            ogX = newCoords.x;
+                            ogY = newCoords.y;
+                            goBack = true;
+                            segments += 1;
+                            return;
+                        }
+                    }
+                    else {
+                        // shouldn't reach this point
+                        return console.log('error handling square off board');
+                    }
+                }
+
+                newCoords = {
+                    'x': x + RANDOM_DIRECTION[dxdy][0],
+                    'y': y + RANDOM_DIRECTION[dxdy][1]
+                }
+
+                if (newCoords.x >= 0 && newCoords.x < 10 &&
+                    newCoords.y >= 0 && newCoords.y < 10) {
+                        if(board.board[newCoords.x][newCoords.y] === 0) {
+                            board.board[newCoords.x][newCoords.y] = 1;
+                            board.ships[shipIdx][idx] = 1;
+                            x = newCoords.x;
+                            y = newCoords.y;
+                            segments += 1;
+                            return;
+                        }
+                        // on board but a ship blocking path
+                        else {
+                            // already confirmed viable so no guards needed here
+                            newCoords = {
+                                'x': ogX - RANDOM_DIRECTION[dxdy][0],
+                                'y': ogY - RANDOM_DIRECTION[dxdy][1] 
+                            }
+                            if(newCoords.x >= 0 && newCoords.x < 10 &&
+                               newCoords.y >= 0 && newCoords.y < 10) {
+                                if(board.board[newCoords.x][newCoords.y] === 0) {
+                                    board.board[newCoords.x][newCoords.y] = 1;
+                                    board.ships[shipIdx][idx] = 1;
+                                    ogX = newCoords.x;
+                                    ogY = newCoords.y;
+                                    goBack = true;
+                                    segments += 1;
+                                    return;
+                                }
+                            }
+                            else {
+                                // shouldn't reach this point
+                                goBack = true;
+                                return console.log('error handling square off board');
+                            }
+                        }
+                }
+                // off board
+                else {
+                    newCoords = {
+                        'x': ogX - RANDOM_DIRECTION[dxdy][0],
+                        'y': ogY - RANDOM_DIRECTION[dxdy][1] 
+                    }
+                    board.board[newCoords.x][newCoords.y] = 1;
+                    board.ships[shipIdx][idx] = 1;
+                    ogX = newCoords.x;
+                    ogY = newCoords.y;
+                    segments += 1;
+                    goBack = true;
+                    return;
+                }
+            }
+
             if(segments > 0) {
                 // randomise one of the 4 directions the next segment can go
                 dxdy = Math.floor(Math.random() * 4)
                 // check if direction is viable
-                if(!checkViablePlace(x, y, ship.length, playerBoard, dxdy)) {
+                if(!checkViablePlace(x, y, ship.length, board, dxdy)) {
                     return place(segment, idx)
                 }
                 newCoords = {
@@ -171,9 +251,9 @@ function placeShips() {
                 }
                 if (newCoords.x >= 0 && newCoords.x < 10 &&
                     newCoords.y >= 0 && newCoords.y < 10) {
-                        if(playerBoard.board[newCoords.x][newCoords.y] === 0) {
-                            playerBoard.board[newCoords.x][newCoords.y] = 1;
-                            playerBoard.ships[shipIdx][idx] = 1;
+                        if(board.board[newCoords.x][newCoords.y] === 0) {
+                            board.board[newCoords.x][newCoords.y] = 1;
+                            board.ships[shipIdx][idx] = 1;
                             x = newCoords.x;
                             y = newCoords.y;
                             segments += 1;
@@ -187,16 +267,17 @@ function placeShips() {
                     return place(segment, idx)
                 }
             }
-            if(playerBoard.ships[shipIdx][idx] === null) {
+
+            if(board.ships[shipIdx][idx] === null) {
                 x = Math.floor(Math.random() * 10)
                 y = Math.floor(Math.random() * 10)
-                if(playerBoard.board[x][y] === 0) {
-                    // try to pass playerBoard.board instead
-                    if(!checkViablePlace(x, y, ship.length, playerBoard, null)) {
+                if(board.board[x][y] === 0) {
+                    // try to pass board.board instead?
+                    if(!checkViablePlace(x, y, ship.length, board, null)) {
                         place(segment, idx)
                     }
-                    playerBoard.board[x][y] = 1;
-                    playerBoard.ships[shipIdx][idx] = 1;
+                    board.board[x][y] = 1;
+                    board.ships[shipIdx][idx] = 1;
                     ogX = x;
                     ogY = y;
                     segments += 1;
@@ -208,23 +289,9 @@ function placeShips() {
             }
         })
     })
-    // // ai ships placed
-    // aiBoard.ships.forEach((ship, shipIdx) => {
-    //     ship.forEach(function place(segment, idx) {
-    //         if(segment === null) {
-    //             let x = Math.floor(Math.random() * 10)
-    //             let y = Math.floor(Math.random() * 10)
-    //             if(aiBoard.board[x][y] === 0) {
-    //                 aiBoard.board[x][y] = 1;
-    //                 aiBoard.ships[shipIdx][idx] = 1;
-    //             }
-    //             else {
-    //                 place(segment, idx)
-    //             }
-    //         }
-    //     })
-    // })
+    render()
 }
+
 // // attempt at making player choose their positions
 // while(segment === null) {
 //     const clickHandle = (evt) => {
@@ -244,16 +311,16 @@ function checkViablePlace(x, y, length, board, dxdy) {
     let up = 0;
     let down = 0;
     for(let i = 1; i < length; i++) {
-        if(board.board[x - i] && left === i - 1) {
+        if(x - i >= 0 && x - i < 10 && left === i - 1) {
             left = board.board[x - i][y] === 0 ? left+1 : left;
         }
-        if(board.board[x + i] && right === i - 1) {
+        if(x + i >= 0 && x + i < 10 && right === i - 1) {
             right = board.board[x + i][y] === 0 ? right+1 : right;
         }
-        if(board.board[x][y - i] && up === i - 1) {
+        if(y - i >= 0 && y - i < 10 && up === i - 1) {
             up = board.board[x][y - i] === 0 ? up+1 : up;
         }
-        if(board.board[x][y + i] && down === i - 1) {
+        if(y + i >= 0 && y + i < 10 && down === i - 1) {
             down = board.board[x][y + i] === 0 ? down+1 : down;
         }
     }
