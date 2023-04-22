@@ -143,6 +143,10 @@ function createBoards() {
 function placeShips() {
     let x;
     let y;
+    let ogX;
+    let ogY;
+    let dxdy;
+    let newCoords;
     // player ships placed
     playerBoard.ships.forEach((ship, shipIdx) => {
         let segments = 0;
@@ -152,58 +156,74 @@ function placeShips() {
                 // if wall/other ship is blocking, go other direction
                 // if both directions blocked, revert values of previous squares and go in perpendicular direction
                 // if still blocked, ship can't be placed -> revert all values and place() again
+                
             } 
             if(segments > 0) {
                 // randomise one of the 4 directions the next segment can go
-                let dxdy = Math.floor(Math.random() * 4)
-                let newCoords = {
+                dxdy = Math.floor(Math.random() * 4)
+                // check if direction is viable
+                if(!checkViablePlace(x, y, ship.length, playerBoard, dxdy)) {
+                    return place(segment, idx)
+                }
+                newCoords = {
                     'x': x + RANDOM_DIRECTION[dxdy][0],
                     'y': y + RANDOM_DIRECTION[dxdy][1]
                 }
-                if (newCoords.x >=0 && newCoords.x < 10 &&
-                    newCoords.y >=0 && newCoords.y < 10) {
+                if (newCoords.x >= 0 && newCoords.x < 10 &&
+                    newCoords.y >= 0 && newCoords.y < 10) {
                         if(playerBoard.board[newCoords.x][newCoords.y] === 0) {
                             playerBoard.board[newCoords.x][newCoords.y] = 1;
                             playerBoard.ships[shipIdx][idx] = 1;
+                            x = newCoords.x;
+                            y = newCoords.y;
+                            segments += 1;
+                            return;
+                        }
+                        else {
+                            return place(segment, idx)
                         }
                     }
                 else {
-                    place(segment, idx)
+                    return place(segment, idx)
                 }
-                x = newCoords.x;
-                y = newCoords.y;
-                segments += 1;
             }
             if(playerBoard.ships[shipIdx][idx] === null) {
                 x = Math.floor(Math.random() * 10)
                 y = Math.floor(Math.random() * 10)
                 if(playerBoard.board[x][y] === 0) {
+                    // try to pass playerBoard.board instead
+                    if(!checkViablePlace(x, y, ship.length, playerBoard, null)) {
+                        place(segment, idx)
+                    }
                     playerBoard.board[x][y] = 1;
                     playerBoard.ships[shipIdx][idx] = 1;
+                    ogX = x;
+                    ogY = y;
+                    segments += 1;
+                    return;
                 }
                 else {
-                    place(segment, idx)
-                }
-                segments += 1;
-            }
-        })
-    })
-    // ai ships placed
-    aiBoard.ships.forEach((ship, shipIdx) => {
-        ship.forEach(function place(segment, idx) {
-            if(segment === null) {
-                let x = Math.floor(Math.random() * 10)
-                let y = Math.floor(Math.random() * 10)
-                if(aiBoard.board[x][y] === 0) {
-                    aiBoard.board[x][y] = 1;
-                    aiBoard.ships[shipIdx][idx] = 1;
-                }
-                else {
-                    place(segment, idx)
+                    return place(segment, idx)
                 }
             }
         })
     })
+    // // ai ships placed
+    // aiBoard.ships.forEach((ship, shipIdx) => {
+    //     ship.forEach(function place(segment, idx) {
+    //         if(segment === null) {
+    //             let x = Math.floor(Math.random() * 10)
+    //             let y = Math.floor(Math.random() * 10)
+    //             if(aiBoard.board[x][y] === 0) {
+    //                 aiBoard.board[x][y] = 1;
+    //                 aiBoard.ships[shipIdx][idx] = 1;
+    //             }
+    //             else {
+    //                 place(segment, idx)
+    //             }
+    //         }
+    //     })
+    // })
 }
 // // attempt at making player choose their positions
 // while(segment === null) {
@@ -218,6 +238,50 @@ function placeShips() {
 // }
 // $('#player-board').on('click', 'div', clickHandle);
 
+function checkViablePlace(x, y, length, board, dxdy) {
+    let left = 0;
+    let right = 0;
+    let up = 0;
+    let down = 0;
+    for(let i = 1; i < length; i++) {
+        if(board.board[x - i] && left === i - 1) {
+            left = board.board[x - i][y] === 0 ? left+1 : left;
+        }
+        if(board.board[x + i] && right === i - 1) {
+            right = board.board[x + i][y] === 0 ? right+1 : right;
+        }
+        if(board.board[x][y - i] && up === i - 1) {
+            up = board.board[x][y - i] === 0 ? up+1 : up;
+        }
+        if(board.board[x][y + i] && down === i - 1) {
+            down = board.board[x][y + i] === 0 ? down+1 : down;
+        }
+    }
+    if(dxdy) {
+        if(dxdy === 0 || dxdy === 1) {
+            if(left + right >= length - 1) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        if(dxdy === 2 || dxdy === 3) {
+            if(up + down >= length - 1) {
+                return true
+            }
+            else {
+                return false;
+            }
+        }
+    }
+
+    if(left + right >= length - 1 || up + down >= length - 1) {
+        return true;
+    }
+
+    return false;
+}
 
 
 function handleTurn(evt) {
