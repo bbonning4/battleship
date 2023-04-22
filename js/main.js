@@ -26,8 +26,10 @@
 
 /*----- constants -----*/
 const TILES = {
+    'null': 'lightskyblue !important',
+    '-1': 'red !important',
     '0': 'lightskyblue',
-    '1': 'darkgrey'
+    '1': 'darkgrey !important'
 }
 
 const RANDOM_DIRECTION = {
@@ -45,7 +47,8 @@ let winner = null;
 class Board {
     constructor() {
         this.ships = [
-            [null],
+            [null, null],
+            [null, null],
             [null, null]
         ];
         this.board = [
@@ -97,16 +100,38 @@ function renderBoards() {
     // or update
     $playerSquares.forEach(sqr => {
         let coords = getXY(sqr, $playerSquares)
-        sqr.style.backgroundColor = TILES[playerBoard.board[coords.x][coords.y]]
+        sqr.style.cssText = `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`
+        if(playerBoard.board[coords.x][coords.y] === null) {
+            sqr.innerText = 'X'
+        }
+    })
+    $aiSquares.forEach(sqr => {
+        let coords = getXY(sqr, $aiSquares)
+        // we don't want to see the enemy ships
+        if(aiBoard.board[coords.x][coords.y] !== 1) {
+            sqr.style.cssText = `background-color: ${TILES[aiBoard.board[coords.x][coords.y]]}`
+            sqr.innerText = ''
+        }     
+        if(aiBoard.board[coords.x][coords.y] === null) {
+            sqr.innerText = 'X'
+        }
     })
 }
+
 
 function renderMessage() {
 
 }
 
 function renderControls() {
-    
+    $('#ai-board').css({
+        'grid-template-columns': 'repeat(10, 4vmin)',
+        'grid-template-rows': 'repeat(10, 4vmin)'
+    })
+    $('#player-board').css({
+        'grid-template-columns': 'repeat(10, 3vmin)',
+        'grid-template-rows': 'repeat(10, 3vmin)'
+    })
 }
 
 function createBoards() {
@@ -121,7 +146,13 @@ function placeShips() {
     // player ships placed
     playerBoard.ships.forEach((ship, shipIdx) => {
         let segments = 0;
-        ship.forEach(function place(segment, idx) { 
+        ship.forEach(function place(segment, idx) {
+            if(segments > 1) {
+                // continue going in same direction
+                // if wall/other ship is blocking, go other direction
+                // if both directions blocked, revert values of previous squares and go in perpendicular direction
+                // if still blocked, ship can't be placed -> revert all values and place() again
+            } 
             if(segments > 0) {
                 // randomise one of the 4 directions the next segment can go
                 let dxdy = Math.floor(Math.random() * 4)
@@ -191,11 +222,19 @@ function placeShips() {
 
 function handleTurn(evt) {
     let coords = getXY(evt, $aiSquares)
-    // 0,0 in top left corner 9,9 in bottom right
+    if(aiBoard.board[coords.x][coords.y] > 0) {
+        // hit
+        aiBoard.board[coords.x][coords.y] = -1;
+    }
+    else if(aiBoard.board[coords.x][coords.y] === 0) {
+        // miss
+        aiBoard.board[coords.x][coords.y] = null;
+    }
 
     // ai shoots next
     aiTurn()
     getWinner()
+    render()
 }
 
 function aiTurn() {
@@ -209,7 +248,9 @@ function getWinner() {
 function getXY(evt, $squares) {
     let x;
     let y;
-    // const sqr = evt.target;
+    if(evt.target) {
+        evt = evt.target;
+    }
     const sqrIdx = $squares.indexOf(evt);
     x = sqrIdx % 10;
     y = Math.floor(sqrIdx/10);

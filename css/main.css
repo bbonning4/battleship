@@ -25,17 +25,17 @@ body {
 }
 
 #ai-board > div {
-    background: lightskyblue;
+    background-color: lightskyblue;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-size: 10vmin;
+    font-size: 5vmin;
     
 }
 
 #ai-board > div:hover {
-    background: lightblue;
+    background-color: lightblue !important;
     /* background: var(--div-bg-color); */
 }
 
