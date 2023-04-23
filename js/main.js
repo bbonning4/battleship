@@ -26,7 +26,7 @@
 
 /*----- constants -----*/
 const TILES = {
-    'null': 'lightskyblue !important',
+    'null': 'white !important',
     '-1': 'red !important',
     '0': 'lightskyblue',
     '1': 'darkgrey !important'
@@ -104,20 +104,13 @@ function renderBoards() {
     $playerSquares.forEach(sqr => {
         let coords = getXY(sqr, $playerSquares)
         sqr.style.cssText = `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`
-        if(playerBoard.board[coords.x][coords.y] === null) {
-            sqr.innerText = 'X'
-        }
     })
     $aiSquares.forEach(sqr => {
         let coords = getXY(sqr, $aiSquares)
         // we don't want to see the enemy ships
         if(aiBoard.board[coords.x][coords.y] !== 1) {
             sqr.style.cssText = `background-color: ${TILES[aiBoard.board[coords.x][coords.y]]}`
-            sqr.innerText = ''
         }     
-        if(aiBoard.board[coords.x][coords.y] === null) {
-            sqr.innerText = 'X'
-        }
     })
 }
 
@@ -142,7 +135,8 @@ function createBoards() {
     aiBoard = new Board();
 }
 
-
+// Current error: if there is a ship in the way and wall, viable isn't being calc'd correctly?
+// results in it thinking the ship can fit
 function placeShips(board) {
     let x;
     let y;
@@ -177,7 +171,7 @@ function placeShips(board) {
                     }
                     else {
                         // shouldn't reach this point
-                        return console.log('error handling square off board');
+                        return console.log('Error', segments, goBack);
                     }
                 }
 
@@ -217,8 +211,7 @@ function placeShips(board) {
                             }
                             else {
                                 // shouldn't reach this point
-                                goBack = true;
-                                return console.log('error handling square off board');
+                                return console.log('Error', segments, goBack);
                             }
                         }
                 }
@@ -239,10 +232,33 @@ function placeShips(board) {
             }
 
             if(segments > 0) {
+                if(goBack) {
+                    newCoords = {
+                        'x': ogX - RANDOM_DIRECTION[dxdy][0],
+                        'y': ogY - RANDOM_DIRECTION[dxdy][1] 
+                    }
+                    if(newCoords.x >= 0 && newCoords.x < 10 &&
+                       newCoords.y >= 0 && newCoords.y < 10) {
+                        if(board.board[newCoords.x][newCoords.y] === 0) {
+                            board.board[newCoords.x][newCoords.y] = 1;
+                            board.ships[shipIdx][idx] = 1;
+                            ogX = newCoords.x;
+                            ogY = newCoords.y;
+                            goBack = true;
+                            segments += 1;
+                            return;
+                        }
+                    }
+                    else {
+                        // shouldn't reach this point
+                        return console.log('Error', segments, goBack);
+                    }
+                }
+
                 // randomise one of the 4 directions the next segment can go
                 dxdy = Math.floor(Math.random() * 4)
                 // check if direction is viable
-                if(!checkViablePlace(x, y, ship.length, board, dxdy)) {
+                if(checkViablePlace(x, y, ship.length, board, dxdy) === false) {
                     return place(segment, idx)
                 }
                 newCoords = {
@@ -260,6 +276,7 @@ function placeShips(board) {
                             return;
                         }
                         else {
+                            goBack = true;
                             return place(segment, idx)
                         }
                     }
@@ -274,7 +291,7 @@ function placeShips(board) {
                 if(board.board[x][y] === 0) {
                     // try to pass board.board instead?
                     if(!checkViablePlace(x, y, ship.length, board, null)) {
-                        place(segment, idx)
+                        return place(segment, idx)
                     }
                     board.board[x][y] = 1;
                     board.ships[shipIdx][idx] = 1;
@@ -324,7 +341,7 @@ function checkViablePlace(x, y, length, board, dxdy) {
             down = board.board[x][y + i] === 0 ? down+1 : down;
         }
     }
-    if(dxdy) {
+    if(dxdy !== null) {
         if(dxdy === 0 || dxdy === 1) {
             if(left + right >= length - 1) {
                 return true;
@@ -346,8 +363,9 @@ function checkViablePlace(x, y, length, board, dxdy) {
     if(left + right >= length - 1 || up + down >= length - 1) {
         return true;
     }
-
-    return false;
+    else {
+        return false;
+    }
 }
 
 
