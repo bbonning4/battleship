@@ -171,7 +171,7 @@ function placeShips(board) {
                     }
                     else {
                         // shouldn't reach this point
-                        return console.log('Error', segments, goBack);
+                        return console.log('Error: Ship segment not placed');
                     }
                 }
 
@@ -211,7 +211,7 @@ function placeShips(board) {
                             }
                             else {
                                 // shouldn't reach this point
-                                return console.log('Error', segments, goBack);
+                                return console.log('Error: Ship segment not placed');
                             }
                         }
                 }
@@ -251,7 +251,7 @@ function placeShips(board) {
                     }
                     else {
                         // shouldn't reach this point
-                        return console.log('Error', segments, goBack);
+                        return console.log('Error: Ship segment not placed');
                     }
                 }
 
@@ -309,18 +309,6 @@ function placeShips(board) {
     render()
 }
 
-// // attempt at making player choose their positions
-// while(segment === null) {
-//     const clickHandle = (evt) => {
-//         let coords = getXY(evt, $playerSquares)
-//         if(playerBoard.board[coords.x][coords.y] === 0) {
-//             playerBoard.board[coords.x][coords.y] = 1;
-//             segment = 1;
-//             $('#player-board').off('click', 'div', clickHandle);
-//         }
-//     }
-// }
-// $('#player-board').on('click', 'div', clickHandle);
 
 function checkViablePlace(x, y, length, board, dxdy) {
     let left = 0;
@@ -379,15 +367,27 @@ function handleTurn(evt) {
         // miss
         aiBoard.board[coords.x][coords.y] = null;
     }
+    else {
+        return;
+    }
 
-    // ai shoots next
     aiTurn()
     getWinner()
     render()
 }
 
 function aiTurn() {
-    
+    let x = Math.floor(Math.random() * 10)
+    let y = Math.floor(Math.random() * 10)
+    if(playerBoard.board[x][y] === 0) {
+        playerBoard.board[x][y] = null;
+    }
+    else if(playerBoard.board[x][y] > 0) {
+        playerBoard.board[x][y] = -1;
+    }
+    else {
+        return aiTurn();
+    }
 }
 
 function getWinner() {
