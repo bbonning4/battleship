@@ -1,1 +1,1 @@
-Click [here](https://htmlpreview.github.io/?https://github.com/bbonning4/battleship/main/index.html) to preview the game!
+Click [here](https://raw.githack.com/bbonning4/battleship/main/index.html) to preview the game!
