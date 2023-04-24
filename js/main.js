@@ -42,7 +42,7 @@ const RANDOM_DIRECTION = {
 /*----- state variables -----*/
 let playerBoard;
 let aiBoard;
-let winner = null;
+let winner = false;
 
 class Board {
     constructor() {
@@ -116,10 +116,30 @@ function renderBoards() {
 
 
 function renderMessage() {
-
+    if(winner) {
+        if(winner === 'draw') {
+            $msgEl.html("It's a draw!")
+        }
+        else {
+            $msgEl.html(`The ${winner} wins!`)
+        }
+    }
 }
 
 function renderControls() {
+    if(winner) {
+        // game ends
+        $('#ai-board').off('click', 'div', handleTurn)
+        $aiSquares.forEach(sqr => {
+            let coords = getXY(sqr, $aiSquares)
+            // we don't want to see the enemy ships
+            if(aiBoard.board[coords.x][coords.y] === 0) {
+                sqr.style.cssText = `background-color: lightskyblue !important`;
+            }     
+        })
+        return;
+    }
+
     $('#ai-board').css({
         'grid-template-columns': 'repeat(10, 4vmin)',
         'grid-template-rows': 'repeat(10, 4vmin)'
@@ -128,6 +148,7 @@ function renderControls() {
         'grid-template-columns': 'repeat(10, 3vmin)',
         'grid-template-rows': 'repeat(10, 3vmin)'
     })
+
 }
 
 function createBoards() {
@@ -392,6 +413,27 @@ function aiTurn() {
 
 function getWinner() {
     // console.log(winner)
+    let playerHasShip = false;
+    let aiHasShip = false;
+    for(let x = 0; x < 10; x++) {
+        for(let y = 0; y < 10; y++) {
+            if(playerBoard.board[x][y] === 1) {
+                playerHasShip = true;
+            }
+            if(aiBoard.board[x][y] === 1) {
+                aiHasShip = true;
+            }
+        }
+    }
+    if(playerHasShip === false && aiHasShip === false) {
+        return winner = 'draw';
+    }
+    if(playerHasShip === false) {
+        return winner = 'AI';
+    }
+    if(aiHasShip === false) {
+        return winner = 'player';
+    }
 }
 
 function getXY(evt, $squares) {
