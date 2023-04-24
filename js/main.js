@@ -6,7 +6,7 @@
     // ships will be initialized in the constructor
 
 // loop through ships array to have player and ai place ships onto board
-    // player will click a square to "begin" placing, and will click an "end" depending on length of ship
+    // initially, both player and ai will place ships randomly
     // prevent overlapping ships or going off board
     // allow player/ai to leave placement in case initial spot won't fit the ship
     // update board array with ship layout
@@ -14,7 +14,7 @@
 // alternate hitting the other board by clicking a tile on opponent's board --handleShot()
     // ai will handleShot by initially selecting random squares until a hit
     // develop ai logic that will attempt to sink a ship after a hit
-    // change tile whether a "hit"(backgroundColor='red') or "miss"(x) occurs
+    // change tile whether a "hit"(backgroundColor='red') or "miss"(white) occurs
 
 // update "ships" frame if a hit or sink occurs
 
@@ -23,6 +23,8 @@
 
 // can restart a new game by clicking a button
 
+// // Additional features planned
+// Allow player to place ships on their own if they choose, or it can be random
 
 /*----- constants -----*/
 const TILES = {
@@ -39,10 +41,20 @@ const RANDOM_DIRECTION = {
     '3': [0, 1]
 }
 
+const SHIP_TYPES = {
+    '0': 'patrol',
+    '1': 'submarine',
+    '2': 'destroyer',
+    '3': 'battleship',
+    '4': 'carrier'
+}
+
 /*----- state variables -----*/
 let playerBoard;
 let aiBoard;
 let winner = false;
+let aiHit = false;
+let aiSunk = false;
 
 class Board {
     constructor() {
@@ -88,8 +100,8 @@ init()
 function init() {
     createBoards()
     render()
-    placeShips(playerBoard)
-    placeShips(aiBoard)
+    placeShips(playerBoard, $playerSquares)
+    placeShips(aiBoard, $aiSquares)
 }
 
 function render() {
@@ -158,7 +170,7 @@ function createBoards() {
 
 // Current error: if there is a ship in the way and wall, viable isn't being calc'd correctly?
 // results in it thinking the ship can fit
-function placeShips(board) {
+function placeShips(board, squares) {
     let x;
     let y;
     let ogX;
@@ -183,6 +195,7 @@ function placeShips(board) {
                         if(board.board[newCoords.x][newCoords.y] === 0) {
                             board.board[newCoords.x][newCoords.y] = 1;
                             board.ships[shipIdx][idx] = 1;
+                            $(squares[newCoords.x*10 + newCoords.y]).attr('class', `${shipIdx}`);
                             ogX = newCoords.x;
                             ogY = newCoords.y;
                             goBack = true;
@@ -206,6 +219,7 @@ function placeShips(board) {
                         if(board.board[newCoords.x][newCoords.y] === 0) {
                             board.board[newCoords.x][newCoords.y] = 1;
                             board.ships[shipIdx][idx] = 1;
+                            $(squares[newCoords.x*10 + newCoords.y]).attr('class', `${shipIdx}`);
                             x = newCoords.x;
                             y = newCoords.y;
                             segments += 1;
@@ -223,6 +237,7 @@ function placeShips(board) {
                                 if(board.board[newCoords.x][newCoords.y] === 0) {
                                     board.board[newCoords.x][newCoords.y] = 1;
                                     board.ships[shipIdx][idx] = 1;
+                                    $(squares[newCoords.x*10 + newCoords.y]).attr('class', `${shipIdx}`);
                                     ogX = newCoords.x;
                                     ogY = newCoords.y;
                                     goBack = true;
@@ -244,6 +259,7 @@ function placeShips(board) {
                     }
                     board.board[newCoords.x][newCoords.y] = 1;
                     board.ships[shipIdx][idx] = 1;
+                    $(squares[newCoords.x*10 + newCoords.y]).attr('class', `${shipIdx}`);
                     ogX = newCoords.x;
                     ogY = newCoords.y;
                     segments += 1;
@@ -263,6 +279,7 @@ function placeShips(board) {
                         if(board.board[newCoords.x][newCoords.y] === 0) {
                             board.board[newCoords.x][newCoords.y] = 1;
                             board.ships[shipIdx][idx] = 1;
+                            $(squares[newCoords.x*10 + newCoords.y]).attr('class', `${shipIdx}`);
                             ogX = newCoords.x;
                             ogY = newCoords.y;
                             goBack = true;
@@ -291,6 +308,7 @@ function placeShips(board) {
                         if(board.board[newCoords.x][newCoords.y] === 0) {
                             board.board[newCoords.x][newCoords.y] = 1;
                             board.ships[shipIdx][idx] = 1;
+                            $(squares[newCoords.x*10 + newCoords.y]).attr('class', `${shipIdx}`);
                             x = newCoords.x;
                             y = newCoords.y;
                             segments += 1;
@@ -316,6 +334,7 @@ function placeShips(board) {
                     }
                     board.board[x][y] = 1;
                     board.ships[shipIdx][idx] = 1;
+                    $(squares[x*10 + y]).attr('class', `${shipIdx}`);
                     ogX = x;
                     ogY = y;
                     segments += 1;

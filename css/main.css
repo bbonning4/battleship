@@ -4,13 +4,18 @@
 
 body {
     height: 100vh;
-    margin: 30px;
+    /* margin: ; */
     /* font-family: */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     background-color: lightskyblue;
+}
+
+header {
+    margin: -5vh 0 3vh 0;
+    font-size: 4vmin;
 }
 
 #ai-board {
