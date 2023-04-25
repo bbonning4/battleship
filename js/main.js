@@ -184,6 +184,8 @@ function createBoards() {
         $(sqr).removeClass();     
     })
 
+    $('#ai-board').on('click', 'div', handleTurn)
+
     winner = false;
     aiHit = false;
     aiHits = 0;
