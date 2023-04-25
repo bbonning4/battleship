@@ -62,6 +62,8 @@ let aiHitX;
 let aiHitY;
 let savedX;
 let savedY;
+let dxdySave = false;
+let keepGoing = false;
 
 class Board {
     constructor() {
@@ -105,6 +107,14 @@ $resetBtn.on('click', init)
 init()
 
 function init() {
+    winner = false;
+    aiHit = false;
+    aiHits = 0;
+    aiSunk = false;
+    playerHit = false;
+    playerSunk = false;
+    dxdySave = false;
+    keepGoing = false;
     createBoards()
     render()
     placeShips(playerBoard, $playerSquares)
@@ -185,14 +195,6 @@ function createBoards() {
     })
 
     $('#ai-board').on('click', 'div', handleTurn)
-
-    winner = false;
-    aiHit = false;
-    aiHits = 0;
-    aiSunk = false;
-    playerHit = false;
-    playerSunk = false;
-
 }
 
 // Current error: if there is a ship in the way and wall, viable isn't being calc'd correctly?
@@ -470,7 +472,61 @@ function aiTurn() {
     if(aiSunk === true) {
         aiHit = false;
         aiSunk = false;
+        dxdySave = false;
     }
+    // if hit occurs in one direction, keep going
+    if(dxdySave !== false) {
+        // problem: ship will keep hitting in line and will error at end of ship
+        newCoords = {
+            'x': aiHitX + RANDOM_DIRECTION[dxdySave][0],
+            'y': aiHitY + RANDOM_DIRECTION[dxdySave][1]
+        }
+        // if coord is off board
+        if(newCoords.x < 0 || newCoords.x > 9 ||
+            newCoords.y < 0 || newCoords.y > 9) {
+                keepGoing = false;
+            }
+        // if coord has already been hit or missed   
+        else if(playerBoard.board[newCoords.x][newCoords.y] !== 0 &&
+            playerBoard.board[newCoords.x][newCoords.y] !== 1) {
+                keepGoing = false;
+            }
+        else {
+            // hit!
+            if(playerBoard.board[newCoords.x][newCoords.y] === 1) {
+                playerBoard.board[newCoords.x][newCoords.y] = -1;
+                aiHitX = newCoords.x;
+                aiHitY = newCoords.y;
+                keepGoing = true;
+                checkSunk(newCoords.x, newCoords.y, $playerSquares, playerBoard.ships, 'ai');
+            }
+            else {
+                // miss
+                playerBoard.board[newCoords.x][newCoords.y] = null;
+                keepGoing = false;
+                return
+            }
+        }
+        if(keepGoing) {
+           // redundant, continue as normally 
+           return;
+        }
+        // go back
+        else {
+            aiHitX = savedX;
+            aiHitY = savedY;
+            newCoords = {
+                'x': aiHitX - RANDOM_DIRECTION[dxdySave][0],
+                'y': aiHitY - RANDOM_DIRECTION[dxdySave][1]
+            }
+            playerBoard.board[newCoords.x][newCoords.y] = -1;
+            checkSunk(newCoords.x, newCoords.y, $playerSquares, playerBoard.ships, 'ai');
+            savedX = newCoords.x;
+            savedY = newCoords.y;
+            return;
+        }
+    }
+
     if(aiHit === true) {
         if(checkViablePlace(aiHitX, aiHitY, 2, playerBoard, null) === false) {
             aiHitX = savedX;
@@ -497,6 +553,7 @@ function aiTurn() {
             playerBoard.board[newCoords.x][newCoords.y] = -1;
             aiHitX = newCoords.x;
             aiHitY = newCoords.y;
+            dxdySave = dxdy;
             checkSunk(newCoords.x, newCoords.y, $playerSquares, playerBoard.ships, 'ai');
         }
         else {
@@ -527,6 +584,7 @@ function aiTurn() {
 
 function checkSunk(x, y, squares, ships, turn) {
     let shipIdx = $(squares[x + (y*10)]).attr('class');
+    console.log(shipIdx)
     ships[shipIdx].every((segment, idx) => {
         if(ships[shipIdx][idx] === 1) {
             ships[shipIdx][idx] = -1;
