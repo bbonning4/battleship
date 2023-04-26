@@ -2,6 +2,7 @@
 
 // // Additional features planned
 // Allow player to place ships on their own if they choose, or it can be random
+// Have a frame of ships that will display hits/sinks as they occur
 
 /*----- constants -----*/
 const TILES = {
@@ -34,6 +35,14 @@ const SHIP_TYPES = {
     '5': 'carrier'
 }
 
+const SHIP_LENGTHS = {
+    '1': 2,
+    '2': 3,
+    '3': 3,
+    '4': 4,
+    '5': 5
+}
+
 /*----- state variables -----*/
 let playerBoard;
 let aiBoard;
@@ -51,6 +60,7 @@ let playerHit = false;
 let playerSunk = false;
 let dxdySave = false;
 let keepGoing = false;
+let initialBoard = true;
 
 class Board {
     constructor() {
@@ -73,6 +83,13 @@ class Board {
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ];
+        this.shipNumFound = {
+            '1': 0,
+            '2': 0,
+            '3': 0,
+            '4': 0,
+            '5': 0
+        }
     }
 }
 
@@ -103,8 +120,8 @@ function init() {
     playerSunk = false;
     dxdySave = false;
     keepGoing = false;
+    initialBoard = true;
     createBoards()
-    render()
     placeShips(playerBoard, $playerSquares)
     placeShips(aiBoard, $aiSquares)
 }
@@ -116,12 +133,45 @@ function render() {
 }
 
 function renderBoards() {
-    // clear all tiles and ships
-    // or update
+    // clear all tiles and ships or update board
+    // How can I get a triangle at the start and back of the ship?
+    // some CSS elements aren't being reset properly on init()
+    // I believe it isn't getting reset properly in this function
     $playerSquares.forEach(sqr => {
         let coords = getXY(sqr, $playerSquares);
-        sqr.style.cssText = `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`;
+        let boardValue = playerBoard.board[coords.x][coords.y]
+
+        if(boardValue !== 0 && boardValue !== null) {
+            playerBoard.shipNumFound[Math.abs(boardValue)] += 1;
+        }
+        else {
+            $(sqr).removeClass('circle')
+            $(sqr).attr('style', `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`)
+        }  
+        if(playerBoard.shipNumFound[Math.abs(boardValue)] === 1 ||
+            playerBoard.shipNumFound[Math.abs(boardValue)] === SHIP_LENGTHS[Math.abs(boardValue)]) {
+            if(boardValue > 0) {
+                $(sqr).removeAttr('style');
+                $(sqr).addClass('circle');
+            }
+            else {
+                $(sqr).removeClass('circle')
+                $(sqr).attr('style', `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`)
+            }  
+        }
+        else {
+            $(sqr).removeClass('circle')
+            $(sqr).attr('style', `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`)
+        } 
     })
+    playerBoard.shipNumFound = {
+        '1': 0,
+        '2': 0,
+        '3': 0,
+        '4': 0,
+        '5': 0
+    }
+
     $aiSquares.forEach(sqr => {
         let coords = getXY(sqr, $aiSquares)
         // we don't want to see the enemy ships
@@ -364,7 +414,8 @@ function placeShips(board, squares) {
             }
         })
     })
-    render()
+    initialBoard = false;
+    render();
 }
 
 
@@ -464,7 +515,6 @@ function aiTurn() {
     }
     // if hit occurs in one direction, keep going
     if(dxdySave !== false) {
-        // problem: ship will keep hitting in line and will error at end of ship
         newCoords = {
             'x': aiHitX + RANDOM_DIRECTION[dxdySave][0],
             'y': aiHitY + RANDOM_DIRECTION[dxdySave][1]
@@ -571,7 +621,7 @@ function aiTurn() {
     }
 }
 
-// bug: using totalHits for both is a mistake
+
 function checkSunk(x, y, board, ships, turn) {
     let shipIdx = -1*board[x][y] - 1;
     ships[shipIdx].every((segment, idx) => {
