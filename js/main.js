@@ -1,27 +1,5 @@
-// define constants
-// define variables used to track game state
-
-// initialize 2 boards, including their "ships"
-    // init() will create boards using a Board class
-    // ships will be initialized in the constructor
-
-// loop through ships array to have player and ai place ships onto board
-    // initially, both player and ai will place ships randomly
-    // prevent overlapping ships or going off board
-    // allow player/ai to leave placement in case initial spot won't fit the ship
-    // update board array with ship layout
-
-// alternate hitting the other board by clicking a tile on opponent's board --handleShot()
-    // ai will handleShot by initially selecting random squares until a hit
-    // develop ai logic that will attempt to sink a ship after a hit
-    // change tile whether a "hit"(backgroundColor='red') or "miss"(white) occurs
-
-// update "ships" frame if a hit or sink occurs
-
-// once all ships for a player has sunk, the winner will be determined at the end of the turn
-    // if both players have all ships sunk at the end of turn, draw
-
-// can restart a new game by clicking a button
+// Current bug: if AI starts on one ship and sinks another in the process, it doesn't know to go back to the other ship it hit
+// Also want to change the div classes being set for ships -> instead used the board array; will have to edit code
 
 // // Additional features planned
 // Allow player to place ships on their own if they choose, or it can be random
@@ -30,8 +8,16 @@
 const TILES = {
     'null': 'white !important',
     '-1': 'red !important',
+    '-2': 'red !important',
+    '-3': 'red !important',
+    '-4': 'red !important',
+    '-5': 'red !important',
     '0': 'lightskyblue',
-    '1': 'darkgrey !important'
+    '1': 'darkgrey !important',
+    '2': 'darkgrey !important',
+    '3': 'darkgrey !important',
+    '4': 'darkgrey !important',
+    '5': 'darkgrey !important'
 }
 
 const RANDOM_DIRECTION = {
@@ -42,11 +28,11 @@ const RANDOM_DIRECTION = {
 }
 
 const SHIP_TYPES = {
-    '0': 'patrol',
-    '1': 'submarine',
-    '2': 'destroyer',
-    '3': 'battleship',
-    '4': 'carrier'
+    '1': 'patrol',
+    '2': 'submarine',
+    '3': 'destroyer',
+    '4': 'battleship',
+    '5': 'carrier'
 }
 
 /*----- state variables -----*/
@@ -137,7 +123,8 @@ function renderBoards() {
     $aiSquares.forEach(sqr => {
         let coords = getXY(sqr, $aiSquares)
         // we don't want to see the enemy ships
-        if(aiBoard.board[coords.x][coords.y] !== 1) {
+        if(aiBoard.board[coords.x][coords.y] <= 0 ||
+           aiBoard.board[coords.x][coords.y] === null) {
             sqr.style.cssText = `background-color: ${TILES[aiBoard.board[coords.x][coords.y]]}`
         }     
     })
@@ -187,18 +174,9 @@ function createBoards() {
     playerBoard = new Board();
     aiBoard = new Board();
 
-    $playerSquares.forEach(sqr => {
-        $(sqr).removeClass();
-    })
-    $aiSquares.forEach(sqr => {
-        $(sqr).removeClass();     
-    })
-
     $('#ai-board').on('click', 'div', handleTurn)
 }
 
-// Current error: if there is a ship in the way and wall, viable isn't being calc'd correctly?
-// results in it thinking the ship can fit
 function placeShips(board, squares) {
     let x;
     let y;
@@ -222,9 +200,8 @@ function placeShips(board, squares) {
                     if(newCoords.x >= 0 && newCoords.x < 10 &&
                        newCoords.y >= 0 && newCoords.y < 10) {
                         if(board.board[newCoords.x][newCoords.y] === 0) {
-                            board.board[newCoords.x][newCoords.y] = 1;
-                            board.ships[shipIdx][idx] = 1;
-                            $(squares[newCoords.x + (newCoords.y*10)]).attr('class', `${shipIdx}`);            
+                            board.board[newCoords.x][newCoords.y] = shipIdx+1;
+                            board.ships[shipIdx][idx] = 1;       
                             ogX = newCoords.x;
                             ogY = newCoords.y;
                             goBack = true;
@@ -246,9 +223,8 @@ function placeShips(board, squares) {
                 if (newCoords.x >= 0 && newCoords.x < 10 &&
                     newCoords.y >= 0 && newCoords.y < 10) {
                         if(board.board[newCoords.x][newCoords.y] === 0) {
-                            board.board[newCoords.x][newCoords.y] = 1;
+                            board.board[newCoords.x][newCoords.y] = shipIdx+1;
                             board.ships[shipIdx][idx] = 1;
-                            $(squares[newCoords.x + (newCoords.y*10)]).attr('class', `${shipIdx}`);
                             x = newCoords.x;
                             y = newCoords.y;
                             segments += 1;
@@ -264,9 +240,8 @@ function placeShips(board, squares) {
                             if(newCoords.x >= 0 && newCoords.x < 10 &&
                                newCoords.y >= 0 && newCoords.y < 10) {
                                 if(board.board[newCoords.x][newCoords.y] === 0) {
-                                    board.board[newCoords.x][newCoords.y] = 1;
+                                    board.board[newCoords.x][newCoords.y] = shipIdx+1;
                                     board.ships[shipIdx][idx] = 1;
-                                    $(squares[newCoords.x + (newCoords.y*10)]).attr('class', `${shipIdx}`);
                                     ogX = newCoords.x;
                                     ogY = newCoords.y;
                                     goBack = true;
@@ -286,9 +261,8 @@ function placeShips(board, squares) {
                         'x': ogX - RANDOM_DIRECTION[dxdy][0],
                         'y': ogY - RANDOM_DIRECTION[dxdy][1] 
                     }
-                    board.board[newCoords.x][newCoords.y] = 1;
+                    board.board[newCoords.x][newCoords.y] = shipIdx+1;
                     board.ships[shipIdx][idx] = 1;
-                    $(squares[newCoords.x + (newCoords.y*10)]).attr('class', `${shipIdx}`);
                     ogX = newCoords.x;
                     ogY = newCoords.y;
                     segments += 1;
@@ -306,9 +280,8 @@ function placeShips(board, squares) {
                     if(newCoords.x >= 0 && newCoords.x < 10 &&
                        newCoords.y >= 0 && newCoords.y < 10) {
                         if(board.board[newCoords.x][newCoords.y] === 0) {
-                            board.board[newCoords.x][newCoords.y] = 1;
+                            board.board[newCoords.x][newCoords.y] = shipIdx+1;
                             board.ships[shipIdx][idx] = 1;
-                            $(squares[newCoords.x + (newCoords.y*10)]).attr('class', `${shipIdx}`);
                             ogX = newCoords.x;
                             ogY = newCoords.y;
                             goBack = true;
@@ -335,9 +308,8 @@ function placeShips(board, squares) {
                 if (newCoords.x >= 0 && newCoords.x < 10 &&
                     newCoords.y >= 0 && newCoords.y < 10) {
                         if(board.board[newCoords.x][newCoords.y] === 0) {
-                            board.board[newCoords.x][newCoords.y] = 1;
+                            board.board[newCoords.x][newCoords.y] = shipIdx+1;
                             board.ships[shipIdx][idx] = 1;
-                            $(squares[newCoords.x + (newCoords.y*10)]).attr('class', `${shipIdx}`);
                             x = newCoords.x;
                             y = newCoords.y;
                             segments += 1;
@@ -361,9 +333,8 @@ function placeShips(board, squares) {
                     if(checkViablePlace(x, y, ship.length, board, null) === false) {
                         return place(segment, idx)
                     }
-                    board.board[x][y] = 1;
+                    board.board[x][y] = shipIdx+1;
                     board.ships[shipIdx][idx] = 1;
-                    $(squares[x + (y*10)]).attr('class', `${shipIdx}`);
                     ogX = x;
                     ogY = y;
                     segments += 1;
@@ -387,20 +358,16 @@ function checkViablePlace(x, y, length, board, dxdy) {
     if(aiHit === true) {
         for(let i = 1; i < length; i++) {
             if(x - i >= 0 && x - i < 10 && left === i - 1) {
-                left = board.board[x - i][y] === 0 ||
-                       board.board[x - i][y] === 1 ? left+1 : left;
+                left = board.board[x - i][y] >= 0 ? left+1 : left;
             }
             if(x + i >= 0 && x + i < 10 && right === i - 1) {
-                right = board.board[x + i][y] === 0 ||
-                        board.board[x + i][y] === 1 ? right+1 : right;
+                right = board.board[x + i][y] >= 0 ? right+1 : right;
             }
             if(y - i >= 0 && y - i < 10 && up === i - 1) {
-                up = board.board[x][y - i] === 0 ||
-                     board.board[x][y - i] === 1 ? up+1 : up;
+                up = board.board[x][y - i] >= 0 ? up+1 : up;
             }
             if(y + i >= 0 && y + i < 10 && down === i - 1) {
-                down = board.board[x][y + i] === 0 ||
-                       board.board[x][y + i] === 1 ? down+1 : down;
+                down = board.board[x][y + i] >= 0 ? down+1 : down;
             }
         }
     }
@@ -452,7 +419,7 @@ function handleTurn(evt) {
     let coords = getXY(evt, $aiSquares)
     if(aiBoard.board[coords.x][coords.y] > 0) {
         // hit
-        aiBoard.board[coords.x][coords.y] = -1;
+        aiBoard.board[coords.x][coords.y] *= -1;
         // checkSunk(coords.x, coords.y, $aiSquares, aiBoard.ships, 'player');
     }
     else if(aiBoard.board[coords.x][coords.y] === 0) {
@@ -487,18 +454,18 @@ function aiTurn() {
                 keepGoing = false;
             }
         // if coord has already been hit or missed   
-        else if(playerBoard.board[newCoords.x][newCoords.y] !== 0 &&
-            playerBoard.board[newCoords.x][newCoords.y] !== 1) {
+        else if(playerBoard.board[newCoords.x][newCoords.y] < 0 ||
+            playerBoard.board[newCoords.x][newCoords.y] === null) {
                 keepGoing = false;
             }
         else {
             // hit!
-            if(playerBoard.board[newCoords.x][newCoords.y] === 1) {
-                playerBoard.board[newCoords.x][newCoords.y] = -1;
+            if(playerBoard.board[newCoords.x][newCoords.y] > 0) {
+                playerBoard.board[newCoords.x][newCoords.y] *= -1;
                 aiHitX = newCoords.x;
                 aiHitY = newCoords.y;
                 keepGoing = true;
-                checkSunk(newCoords.x, newCoords.y, $playerSquares, playerBoard.ships, 'ai');
+                checkSunk(newCoords.x, newCoords.y, playerBoard.board, playerBoard.ships, 'ai');
             }
             else {
                 // miss
@@ -519,8 +486,8 @@ function aiTurn() {
                 'x': aiHitX - RANDOM_DIRECTION[dxdySave][0],
                 'y': aiHitY - RANDOM_DIRECTION[dxdySave][1]
             }
-            playerBoard.board[newCoords.x][newCoords.y] = -1;
-            checkSunk(newCoords.x, newCoords.y, $playerSquares, playerBoard.ships, 'ai');
+            playerBoard.board[newCoords.x][newCoords.y] *= -1;
+            checkSunk(newCoords.x, newCoords.y, playerBoard.board, playerBoard.ships, 'ai');
             savedX = newCoords.x;
             savedY = newCoords.y;
             return;
@@ -544,17 +511,17 @@ function aiTurn() {
             return aiTurn();
            }
         // if coord has already been hit or missed   
-        if(playerBoard.board[newCoords.x][newCoords.y] !== 0 &&
-           playerBoard.board[newCoords.x][newCoords.y] !== 1) {
+        if(playerBoard.board[newCoords.x][newCoords.y] < 0 ||
+           playerBoard.board[newCoords.x][newCoords.y] === null) {
             return aiTurn();
            }
         // hit!
-        if(playerBoard.board[newCoords.x][newCoords.y] === 1) {
-            playerBoard.board[newCoords.x][newCoords.y] = -1;
+        if(playerBoard.board[newCoords.x][newCoords.y] > 0) {
+            playerBoard.board[newCoords.x][newCoords.y] *= -1;
             aiHitX = newCoords.x;
             aiHitY = newCoords.y;
             dxdySave = dxdy;
-            checkSunk(newCoords.x, newCoords.y, $playerSquares, playerBoard.ships, 'ai');
+            checkSunk(newCoords.x, newCoords.y, playerBoard.board, playerBoard.ships, 'ai');
         }
         else {
             playerBoard.board[newCoords.x][newCoords.y] = null;
@@ -567,12 +534,12 @@ function aiTurn() {
             playerBoard.board[x][y] = null;
         }
         else if(playerBoard.board[x][y] > 0) {
-            playerBoard.board[x][y] = -1;
+            playerBoard.board[x][y] *= -1;
             aiHitX = x;
             aiHitY = y;
             savedX = x;
             savedY = y;
-            checkSunk(x, y, $playerSquares, playerBoard.ships, 'ai');
+            checkSunk(x, y, playerBoard.board, playerBoard.ships, 'ai');
             return aiHit = true;
         }
         else {
@@ -582,9 +549,8 @@ function aiTurn() {
 }
 
 
-function checkSunk(x, y, squares, ships, turn) {
-    let shipIdx = $(squares[x + (y*10)]).attr('class');
-    console.log(shipIdx)
+function checkSunk(x, y, board, ships, turn) {
+    let shipIdx = -1*board[x][y] - 1;
     ships[shipIdx].every((segment, idx) => {
         if(ships[shipIdx][idx] === 1) {
             ships[shipIdx][idx] = -1;
@@ -605,7 +571,7 @@ function checkSunk(x, y, squares, ships, turn) {
         }
         else {
             // ai sunk ship
-            console.log(`ship ${shipIdx} has been sunk!`)
+            console.log(`Your ${SHIP_TYPES[shipIdx+1]} has been sunk!`)
             aiHits = 0;
             aiSunk = true;
         }
@@ -627,10 +593,10 @@ function getWinner() {
     let aiHasShip = false;
     for(let x = 0; x < 10; x++) {
         for(let y = 0; y < 10; y++) {
-            if(playerBoard.board[x][y] === 1) {
+            if(playerBoard.board[x][y] > 0) {
                 playerHasShip = true;
             }
-            if(aiBoard.board[x][y] === 1) {
+            if(aiBoard.board[x][y] > 0) {
                 aiHasShip = true;
             }
         }
