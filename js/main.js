@@ -1,5 +1,4 @@
 // Current bug: if AI starts on one ship and sinks another in the process, it doesn't know to go back to the other ship it hit
-// Also want to change the div classes being set for ships -> instead used the board array; will have to edit code
 
 // // Additional features planned
 // Allow player to place ships on their own if they choose, or it can be random
@@ -38,16 +37,18 @@ const SHIP_TYPES = {
 /*----- state variables -----*/
 let playerBoard;
 let aiBoard;
-let winner = false;
-let aiHit = false;
-let aiSunk = false;
-let playerHit = false;
-let playerSunk = false;
-let aiHits = 0;
 let aiHitX;
 let aiHitY;
 let savedX;
 let savedY;
+
+let winner = false;
+let aiHit = false;
+let aiTotalHits = 0;
+let playerTotalHits = 0;
+let aiSunk = false;
+let playerHit = false;
+let playerSunk = false;
 let dxdySave = false;
 let keepGoing = false;
 
@@ -95,7 +96,8 @@ init()
 function init() {
     winner = false;
     aiHit = false;
-    aiHits = 0;
+    aiTotalHits = 0;
+    playerTotalHits = 0;
     aiSunk = false;
     playerHit = false;
     playerSunk = false;
@@ -133,15 +135,31 @@ function renderBoards() {
 
 function renderMessage() {
     if(winner) {
-        if(winner === 'draw') {
-            $msgEl.html("It's a draw!")
+        if(aiSunk > 0 && playerSunk > 0) {
+            if(winner === 'draw') {
+                $msgEl.html(`You sunk their ${SHIP_TYPES[playerSunk]}, and your ${SHIP_TYPES[aiSunk]} has been sunk!<br>It's a draw!`)
+            }
+            else {
+                $msgEl.html(`You sunk their ${SHIP_TYPES[playerSunk]}, and your ${SHIP_TYPES[aiSunk]} has been sunk!<br>The ${winner} wins!`)
+            }
         }
-        else {
-            $msgEl.html(`The ${winner} wins!`)
+        else if(aiSunk > 0 || playerSunk > 0) {
+            aiSunk > 0 ? $msgEl.html(`Your ${SHIP_TYPES[aiSunk]} has been sunk!<br>The ${winner} wins!`):$msgEl.html(`You sunk their ${SHIP_TYPES[playerSunk]}!<br>The ${winner} wins!`);
         }
     }
     else {
-        $msgEl.html("");
+        if(aiSunk > 0 && playerSunk > 0) {
+            $msgEl.html(`You sunk their ${SHIP_TYPES[playerSunk]}, and your ${SHIP_TYPES[aiSunk]} has been sunk!`)
+        }
+        else if(aiSunk > 0) {
+            $msgEl.html(`Your ${SHIP_TYPES[aiSunk]} has been sunk!`)
+        }
+        else if(playerSunk > 0) {
+            $msgEl.html(`You sunk their ${SHIP_TYPES[playerSunk]}!`)
+        }
+        else {
+            $msgEl.html("");
+        }
     }
 }
 
@@ -416,11 +434,14 @@ function checkViablePlace(x, y, length, board, dxdy) {
 
 
 function handleTurn(evt) {
+    if(playerSunk > 0) {
+        playerSunk = false;
+    }
     let coords = getXY(evt, $aiSquares)
     if(aiBoard.board[coords.x][coords.y] > 0) {
         // hit
         aiBoard.board[coords.x][coords.y] *= -1;
-        // checkSunk(coords.x, coords.y, $aiSquares, aiBoard.ships, 'player');
+        checkSunk(coords.x, coords.y, aiBoard.board, aiBoard.ships, 'player');
     }
     else if(aiBoard.board[coords.x][coords.y] === 0) {
         // miss
@@ -436,7 +457,7 @@ function handleTurn(evt) {
 }
 
 function aiTurn() {
-    if(aiSunk === true) {
+    if(aiSunk > 0) {
         aiHit = false;
         aiSunk = false;
         dxdySave = false;
@@ -466,6 +487,7 @@ function aiTurn() {
                 aiHitY = newCoords.y;
                 keepGoing = true;
                 checkSunk(newCoords.x, newCoords.y, playerBoard.board, playerBoard.ships, 'ai');
+                return;
             }
             else {
                 // miss
@@ -522,6 +544,7 @@ function aiTurn() {
             aiHitY = newCoords.y;
             dxdySave = dxdy;
             checkSunk(newCoords.x, newCoords.y, playerBoard.board, playerBoard.ships, 'ai');
+            return;
         }
         else {
             playerBoard.board[newCoords.x][newCoords.y] = null;
@@ -548,40 +571,40 @@ function aiTurn() {
     }
 }
 
-
+// bug: using totalHits for both is a mistake
 function checkSunk(x, y, board, ships, turn) {
     let shipIdx = -1*board[x][y] - 1;
     ships[shipIdx].every((segment, idx) => {
         if(ships[shipIdx][idx] === 1) {
             ships[shipIdx][idx] = -1;
             // check for better way to keep track of this
-            aiHits += 1;
+            turn === 'player' ? playerTotalHits += 1 : aiTotalHits += 1;
             return false;
         }
         else if(ships[shipIdx][idx] === -1) {
-            aiHits += 1;
+            turn === 'player' ? playerTotalHits += 1 : aiTotalHits += 1;
             return true;
         }
     });
-    if(aiHits === ships[shipIdx].length) {
-        // ship is sunk!
-        if(turn === 'player') {
+    if(turn === 'player') {
+        if(playerTotalHits === ships[shipIdx].length) {
             // player sunk ship
-            return playerSunk = true;
+            playerTotalHits = 0;
+            return playerSunk = shipIdx+1;
         }
         else {
-            // ai sunk ship
-            console.log(`Your ${SHIP_TYPES[shipIdx+1]} has been sunk!`)
-            aiHits = 0;
-            aiSunk = true;
+            playerTotalHits = 0;
+            return playerSunk = false;
         }
     }
     else {
-        if(turn === 'player') {
-            return playerSunk = false;
+        if(aiTotalHits === ships[shipIdx].length) {
+            // ai sunk ship
+            aiTotalHits = 0;
+            return aiSunk = shipIdx+1;
         }
         else {
-            aiHits = 0;
+            aiTotalHits = 0;
             return aiSunk = false;
         }
     }
