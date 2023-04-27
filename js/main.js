@@ -1,6 +1,3 @@
-// Current bugs: in hard mode, the computer will attempt to go back to a hit ship after a sink, as it should
-// either an error will occur(infinite loop) OR multiple turns will occur
-
 // // Additional features planned
 // Allow player to place ships on their own if they choose, or it can be random
 // Have a frame of ships that will display hits/sinks as they occur
@@ -533,10 +530,6 @@ function aiTurn() {
         aiSunk = false;
         dxdySave = false;
         if(hardMode) {
-            // if aiSunk = true, loop over ships array to see if there is another hit somewhere
-            // if there is, go back to one of those hit squares 
-            // check for viable (length=2) with this hit square, making sure to add guard for water if needed
-            // if no viable, go to a different hit square and try again
             for(let ship = 0; ship < playerBoard.ships.length; ship++) {
                 let negative = 0;
                 let positive = 0;
@@ -548,9 +541,7 @@ function aiTurn() {
                         negative += 1;
                     }
                     if(positive > 0 && negative > 0) {
-                        // here we have a hit we need to go back to
-                        // scan board for -1*(shipIdx+1)
-                        // set this location as new savedX and savedY(and aiHitX/aiHitY), set aiHit = true
+                        // Have another ship hit, go back to attempt sink
                         for(let x in playerBoard.board) {
                             for(let y in playerBoard.board[x]) {
                                 if(playerBoard.board[x][y] === -1*(ship+1)) {

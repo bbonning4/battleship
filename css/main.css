@@ -93,17 +93,12 @@ button:hover {
 
 
 .triangle-up {
-    box-sizing: border-box;
-    /* width: 100%; */
-    /* height: 100%; */
     position: relative;
     background-color: lightskyblue !important;
 }
 .triangle-up::before {
     content: "";
     display: block;
-    /* width: 100%; */
-    /* height: 0; */
 }
 .triangle-up::after {
     content: "";
@@ -111,22 +106,16 @@ button:hover {
     border: 1.5vmin solid transparent;
     border-top: 0;
     border-bottom: 3vmin solid #42423f;
-
 }
 
 
 .triangle-down {
-    box-sizing: border-box;
-    /* width: 100%; */
-    /* height: 100%; */
     position: relative;
     background-color: lightskyblue !important;
 }
 .triangle-down::before {
     content: "";
     display: block;
-    /* width: 100%; */
-    /* height: 0; */
 }
 .triangle-down::after {
     content: "";
@@ -134,22 +123,16 @@ button:hover {
     border: 1.5vmin solid transparent;
     border-bottom: 0;
     border-top: 3vmin solid #42423f;
-
 }
 
 
 .triangle-left {
-    box-sizing: border-box;
-    /* width: 100%; */
-    /* height: 100%; */
     position: relative;
     background-color: lightskyblue !important;
 }
 .triangle-left::before {
     content: "";
     display: block;
-    /* width: 100%; */
-    /* height: 0; */
 }
 .triangle-left::after {
     content: "";
@@ -157,22 +140,16 @@ button:hover {
     border: 1.5vmin solid transparent;
     border-left: 0;
     border-right: 3vmin solid #42423f;
-
 }
 
 
 .triangle-right {
-    box-sizing: border-box;
-    /* width: 100%; */
-    /* height: 100%; */
     position: relative;
     background-color: lightskyblue !important;
 }
 .triangle-right::before {
     content: "";
     display: block;
-    /* width: 100%; */
-    /* height: 0; */
 }
 .triangle-right::after {
     content: "";
@@ -180,5 +157,4 @@ button:hover {
     border: 1.5vmin solid transparent;
     border-right: 0;
     border-left: 3vmin solid #42423f;
-
 }
