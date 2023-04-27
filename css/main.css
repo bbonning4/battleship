@@ -24,8 +24,8 @@ header {
 
 #ai-board {
     display: grid;
-    grid-template-columns: repeat(10, 3vmin);
-    grid-template-rows: repeat(10, 3vmin);
+    grid-template-columns: repeat(10, 4vmin);
+    grid-template-rows: repeat(10, 4vmin);
     grid-column-gap: 1px;
     grid-row-gap: 1px;
     background-color: black;
@@ -50,8 +50,8 @@ header {
 
 #player-board {
     display: grid;
-    grid-template-columns: repeat(10, 4vmin);
-    grid-template-rows: repeat(10, 4vmin);
+    grid-template-columns: repeat(10, 3vmin);
+    grid-template-rows: repeat(10, 3vmin);
     grid-column-gap: 1px;
     grid-row-gap: 1px;
     background-color: black;
@@ -79,7 +79,7 @@ button {
     padding: 2vmin;
     font-size: 2vmin;
     border-radius: 2vmin;
-    color: grey;
+    color: black;
 }
 
 button:hover {
@@ -93,68 +93,64 @@ button:hover {
 
 
 .triangle-up {
-    position: relative;
     background-color: lightskyblue !important;
 }
 .triangle-up::before {
     content: "";
-    display: block;
 }
 .triangle-up::after {
     content: "";
-    position: absolute;
-    border: 1.5vmin solid transparent;
-    border-top: 0;
-    border-bottom: 3vmin solid #42423f;
+    background-color: #42423f;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    width: 3vmin;
+    height: 3vmin;
+    box-shadow: 0 1px 0 0 #42423f;
 }
 
 
 .triangle-down {
-    position: relative;
     background-color: lightskyblue !important;
 }
 .triangle-down::before {
     content: "";
-    display: block;
 }
 .triangle-down::after {
     content: "";
-    position: absolute;
-    border: 1.5vmin solid transparent;
-    border-bottom: 0;
-    border-top: 3vmin solid #42423f;
+    background-color: #42423f;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    width: 3vmin;
+    height: 3vmin;
+    box-shadow: 1px 0 0 0 #42423f;
 }
 
 
 .triangle-left {
-    position: relative;
     background-color: lightskyblue !important;
 }
 .triangle-left::before {
     content: "";
-    display: block;
 }
 .triangle-left::after {
     content: "";
-    position: absolute;
-    border: 1.5vmin solid transparent;
-    border-left: 0;
-    border-right: 3vmin solid #42423f;
+    background-color: #42423f;
+    clip-path: polygon(0 50%, 100% 0, 100% 100%);
+    width: 3vmin;
+    height: 3vmin;
+    box-shadow: 0 0 0 1px #42423f;
 }
 
 
 .triangle-right {
-    position: relative;
     background-color: lightskyblue !important;
 }
 .triangle-right::before {
     content: "";
-    display: block;
 }
 .triangle-right::after {
     content: "";
-    position: absolute;
-    border: 1.5vmin solid transparent;
-    border-right: 0;
-    border-left: 3vmin solid #42423f;
+    background-color: #42423f;
+    clip-path: polygon(0 0, 0 100%, 100% 50%);
+    width: 3vmin;
+    height: 3vmin;
+    box-shadow: 0 0 1px 0 #42423f;
 }

@@ -50,6 +50,7 @@ let savedX;
 let savedY;
 
 let hardMode = false;
+let gameStart = false;
 
 let winner = false;
 let aiHit = false;
@@ -116,7 +117,7 @@ init()
 function enableHardMode() {
     if(hardMode) {
         hardMode = false;
-        $hardModeBtn.css({'background-color':'', 'color':'grey', 'border':''})
+        $hardModeBtn.css({'background-color':'', 'color':'black', 'border':''})
         $hardModeBtn.text('Enable Hard Mode')
     }
     else {
@@ -138,6 +139,7 @@ function init() {
     dxdySave = false;
     keepGoing = false;
     initialBoard = true;
+    gameStart = false;
     createBoards()
     placeShips(playerBoard, $playerSquares)
     placeShips(aiBoard, $aiSquares)
@@ -189,11 +191,16 @@ function renderBoards() {
 
     $aiSquares.forEach(sqr => {
         let coords = getXY(sqr, $aiSquares)
-        // we don't want to see the enemy ships
-        if(aiBoard.board[coords.x][coords.y] <= 0 ||
-           aiBoard.board[coords.x][coords.y] === null) {
+        // we don't want to see the enemy ships unless there is a winner
+        if(winner) {
             sqr.style.cssText = `background-color: ${TILES[aiBoard.board[coords.x][coords.y]]}`
-        }     
+        }
+        else {
+            if(aiBoard.board[coords.x][coords.y] <= 0 ||
+               aiBoard.board[coords.x][coords.y] === null) {
+                sqr.style.cssText = `background-color: ${TILES[aiBoard.board[coords.x][coords.y]]}`
+            }     
+        }
     })
 }
 
@@ -242,14 +249,12 @@ function renderControls() {
         return;
     }
 
-    $('#ai-board').css({
-        'grid-template-columns': 'repeat(10, 4vmin)',
-        'grid-template-rows': 'repeat(10, 4vmin)'
-    })
-    $('#player-board').css({
-        'grid-template-columns': 'repeat(10, 3vmin)',
-        'grid-template-rows': 'repeat(10, 3vmin)'
-    })
+    if(gameStart) {
+        $resetBtn.text('New Game');
+    }
+    else {
+        $resetBtn.text('Shuffle Board');
+    }
 
 }
 
@@ -502,6 +507,7 @@ function checkViablePlace(x, y, length, board, dxdy) {
 
 
 function handleTurn(evt) {
+    gameStart = true;
     if(playerSunk > 0) {
         playerSunk = false;
     }
