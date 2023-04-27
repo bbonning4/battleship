@@ -13,11 +13,11 @@ const TILES = {
     '-4': 'red !important',
     '-5': 'red !important',
     '0': 'lightskyblue',
-    '1': 'darkgrey !important',
-    '2': 'darkgrey !important',
-    '3': 'darkgrey !important',
-    '4': 'darkgrey !important',
-    '5': 'darkgrey !important'
+    '1': '#42423f !important',
+    '2': '#42423f !important',
+    '3': '#42423f !important',
+    '4': '#42423f !important',
+    '5': '#42423f !important'
 }
 
 const RANDOM_DIRECTION = {
@@ -135,33 +135,34 @@ function render() {
 function renderBoards() {
     // clear all tiles and ships or update board
     // How can I get a triangle at the start and back of the ship?
-    // some CSS elements aren't being reset properly on init()
-    // I believe it isn't getting reset properly in this function
+    // check adjacent ships when the 'triangle' class is added (will be changed to 'triangle')
+    // 
     $playerSquares.forEach(sqr => {
         let coords = getXY(sqr, $playerSquares);
-        let boardValue = playerBoard.board[coords.x][coords.y]
+        let boardValue = playerBoard.board[coords.x][coords.y];
 
         if(boardValue !== 0 && boardValue !== null) {
             playerBoard.shipNumFound[Math.abs(boardValue)] += 1;
         }
         else {
-            $(sqr).removeClass('circle')
-            $(sqr).attr('style', `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`)
+            $(sqr).removeAttr('class');
+            $(sqr).attr('style', `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`);
         }  
         if(playerBoard.shipNumFound[Math.abs(boardValue)] === 1 ||
             playerBoard.shipNumFound[Math.abs(boardValue)] === SHIP_LENGTHS[Math.abs(boardValue)]) {
             if(boardValue > 0) {
                 $(sqr).removeAttr('style');
-                $(sqr).addClass('circle');
+                $(sqr).removeAttr('class');
+                checkTriangleDirection(coords.x, coords.y, playerBoard, boardValue, sqr);
             }
             else {
-                $(sqr).removeClass('circle')
-                $(sqr).attr('style', `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`)
+                $(sqr).removeAttr('class');
+                $(sqr).attr('style', `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`);
             }  
         }
         else {
-            $(sqr).removeClass('circle')
-            $(sqr).attr('style', `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`)
+            $(sqr).removeAttr('class');
+            $(sqr).attr('style', `background-color: ${TILES[playerBoard.board[coords.x][coords.y]]}`);
         } 
     })
     playerBoard.shipNumFound = {
@@ -695,4 +696,32 @@ function getXY(evt, $squares) {
     x = sqrIdx % 10;
     y = Math.floor(sqrIdx/10);
     return {'x':x, 'y':y};
+}
+
+
+function checkTriangleDirection(x, y, board, value, sqr) {
+    if(x + 1 >= 0 && x + 1 < 10) {
+        if(Math.abs(board.board[x + 1][y]) === Math.abs(value)) {
+            // point left
+            $(sqr).addClass('triangle-left');
+        }
+    }
+    if(x - 1 >= 0 && x - 1 < 10) {
+        if(Math.abs(board.board[x - 1][y]) === Math.abs(value)) {
+            // point right
+            $(sqr).addClass('triangle-right');
+        }
+    }
+    if(y + 1 >= 0 && y + 1 < 10) {
+        if(Math.abs(board.board[x][y + 1]) === Math.abs(value)) {
+            // point up
+            $(sqr).addClass('triangle-up');
+        }
+    }
+    if(y - 1 >= 0 && y - 1 < 10) {
+        if(Math.abs(board.board[x][y - 1]) === Math.abs(value)) {
+            // point down
+            $(sqr).addClass('triangle-down');
+        }
+    }
 }
