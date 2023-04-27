@@ -83,8 +83,12 @@ button {
 }
 
 button:hover {
-    color: white;
+    color: white !important;
     background-color: blue;
+}
+
+#hard-mode:hover {
+    background-color: red;
 }
 
 

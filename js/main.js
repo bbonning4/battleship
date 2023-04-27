@@ -1,4 +1,8 @@
 // Current bug: if AI starts on one ship and sinks another in the process, it doesn't know to go back to the other ship it hit
+// if aiSunk = true, loop over ships array to see if there is another hit somewhere
+// if there is, go back to one of those hit squares 
+// check for viable (length=2) with this hit square, making sure to add guard for water if needed
+// if no viable, go to a different hit square and try again
 
 // // Additional features planned
 // Allow player to place ships on their own if they choose, or it can be random
@@ -51,6 +55,8 @@ let aiHitY;
 let savedX;
 let savedY;
 
+let hardMode = false;
+
 let winner = false;
 let aiHit = false;
 let aiTotalHits = 0;
@@ -96,7 +102,8 @@ class Board {
 
 /*----- cached elements  -----*/
 const $msgEl = $('#msg');
-const $resetBtn = $('button');
+const $resetBtn = $('#new');
+const $hardModeBtn = $('#hard-mode')
 const $playerSquares = $('#player-board > div').toArray();
 const $aiSquares = $('#ai-board > div').toArray();
 
@@ -104,11 +111,26 @@ const $aiSquares = $('#ai-board > div').toArray();
 // $('#player-board').on('click', 'div', placeShips)
 $('#ai-board').on('click', 'div', handleTurn)
 $resetBtn.on('click', init)
+$hardModeBtn.on('click', enableHardMode)
 
 
 /*----- functions -----*/
 // initialize board on refresh
 init()
+
+function enableHardMode() {
+    if(hardMode) {
+        hardMode = false;
+        $hardModeBtn.css({'background-color':'', 'color':'grey', 'border':''})
+        $hardModeBtn.text('Enable Hard Mode')
+    }
+    else {
+        hardMode = true;
+        $hardModeBtn.css({'background-color':'red', 'color':'white', 'border':'5px solid gold'})
+        $hardModeBtn.text('HARD MODE ENABLED')
+    }
+    init()
+}
 
 function init() {
     winner = false;
@@ -426,22 +448,24 @@ function checkViablePlace(x, y, length, board, dxdy) {
     let up = 0;
     let down = 0;
     if(aiHit === true) {
+        // used for checking aiHits
         for(let i = 1; i < length; i++) {
             if(x - i >= 0 && x - i < 10 && left === i - 1) {
-                left = board.board[x - i][y] >= 0 ? left+1 : left;
+                left = board.board[x - i][y] !== null && board.board[x - i][y] >= 0 ? left+1 : left;
             }
             if(x + i >= 0 && x + i < 10 && right === i - 1) {
-                right = board.board[x + i][y] >= 0 ? right+1 : right;
+                right = board.board[x + i][y] !== null && board.board[x + i][y] >= 0 ? right+1 : right;
             }
             if(y - i >= 0 && y - i < 10 && up === i - 1) {
-                up = board.board[x][y - i] >= 0 ? up+1 : up;
+                up = board.board[x][y - i] !== null && board.board[x][y - i] >= 0 ? up+1 : up;
             }
             if(y + i >= 0 && y + i < 10 && down === i - 1) {
-                down = board.board[x][y + i] >= 0 ? down+1 : down;
+                down = board.board[x][y + i] !== null && board.board[x][y + i] >= 0 ? down+1 : down;
             }
         }
     }
     else {
+        // used for placing ships
         for(let i = 1; i < length; i++) {
             if(x - i >= 0 && x - i < 10 && left === i - 1) {
                 left = board.board[x - i][y] === 0 ? left+1 : left;
@@ -514,59 +538,72 @@ function aiTurn() {
         aiSunk = false;
         dxdySave = false;
     }
-    // if hit occurs in one direction, keep going
-    if(dxdySave !== false) {
-        newCoords = {
-            'x': aiHitX + RANDOM_DIRECTION[dxdySave][0],
-            'y': aiHitY + RANDOM_DIRECTION[dxdySave][1]
-        }
-        // if coord is off board
-        if(newCoords.x < 0 || newCoords.x > 9 ||
-            newCoords.y < 0 || newCoords.y > 9) {
-                keepGoing = false;
+    if(hardMode) {
+        // if hit occurs in one direction, keep going
+        if(dxdySave !== false) {
+            newCoords = {
+                'x': aiHitX + RANDOM_DIRECTION[dxdySave][0],
+                'y': aiHitY + RANDOM_DIRECTION[dxdySave][1]
             }
-        // if coord has already been hit or missed   
-        else if(playerBoard.board[newCoords.x][newCoords.y] < 0 ||
-            playerBoard.board[newCoords.x][newCoords.y] === null) {
-                keepGoing = false;
+            // if coord is off board
+            if(newCoords.x < 0 || newCoords.x > 9 ||
+                newCoords.y < 0 || newCoords.y > 9) {
+                    keepGoing = false;
+                }
+            // if coord has already been hit or missed   
+            else if(playerBoard.board[newCoords.x][newCoords.y] < 0 ||
+                playerBoard.board[newCoords.x][newCoords.y] === null) {
+                    keepGoing = false;
+                }
+            else {
+                // hit!
+                if(playerBoard.board[newCoords.x][newCoords.y] > 0) {
+                    playerBoard.board[newCoords.x][newCoords.y] *= -1;
+                    aiHitX = newCoords.x;
+                    aiHitY = newCoords.y;
+                    keepGoing = true;
+                    checkSunk(newCoords.x, newCoords.y, playerBoard.board, playerBoard.ships, 'ai');
+                    return;
+                }
+                else {
+                    // miss
+                    playerBoard.board[newCoords.x][newCoords.y] = null;
+                    keepGoing = false;
+                    return
+                }
             }
-        else {
-            // hit!
-            if(playerBoard.board[newCoords.x][newCoords.y] > 0) {
+            if(keepGoing) {
+               // redundant, continue as normally 
+               return;
+            }
+            // go back
+            else {
+                aiHitX = savedX;
+                aiHitY = savedY;
+                if(checkViablePlace(aiHitX, aiHitY, 2, playerBoard, dxdySave) === false) {
+                    dxdySave = false;
+                    return aiTurn();
+                }
+                newCoords = {
+                    'x': aiHitX - RANDOM_DIRECTION[dxdySave][0],
+                    'y': aiHitY - RANDOM_DIRECTION[dxdySave][1]
+                }
+                // guard against going through water(0's) since checkViablePlace will still pass true for water
+                if(playerBoard.board[newCoords.x][newCoords.y] === 0) {
+                    aiHitX = savedX;
+                    aiHitY = savedY;
+                    dxdySave = false;
+                    return aiTurn();
+                }
                 playerBoard.board[newCoords.x][newCoords.y] *= -1;
-                aiHitX = newCoords.x;
-                aiHitY = newCoords.y;
-                keepGoing = true;
                 checkSunk(newCoords.x, newCoords.y, playerBoard.board, playerBoard.ships, 'ai');
+                savedX = newCoords.x;
+                savedY = newCoords.y;
                 return;
             }
-            else {
-                // miss
-                playerBoard.board[newCoords.x][newCoords.y] = null;
-                keepGoing = false;
-                return
-            }
-        }
-        if(keepGoing) {
-           // redundant, continue as normally 
-           return;
-        }
-        // go back
-        else {
-            aiHitX = savedX;
-            aiHitY = savedY;
-            newCoords = {
-                'x': aiHitX - RANDOM_DIRECTION[dxdySave][0],
-                'y': aiHitY - RANDOM_DIRECTION[dxdySave][1]
-            }
-            playerBoard.board[newCoords.x][newCoords.y] *= -1;
-            checkSunk(newCoords.x, newCoords.y, playerBoard.board, playerBoard.ships, 'ai');
-            savedX = newCoords.x;
-            savedY = newCoords.y;
-            return;
         }
     }
-
+    // easy mode, doesn't know how to goBack yet
     if(aiHit === true) {
         if(checkViablePlace(aiHitX, aiHitY, 2, playerBoard, null) === false) {
             aiHitX = savedX;
