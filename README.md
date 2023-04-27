@@ -5,6 +5,8 @@ hitting each other's board.  The first player to "sink" all of the other players
 
 This game incorporates JavaScript, HTML, CSS, and JQuery.
 
+![screenshot](images/battleship_screenshot.png)
+
 
 ## Getting Started
 
