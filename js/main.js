@@ -1,8 +1,5 @@
-// Current bug: if AI starts on one ship and sinks another in the process, it doesn't know to go back to the other ship it hit
-// if aiSunk = true, loop over ships array to see if there is another hit somewhere
-// if there is, go back to one of those hit squares 
-// check for viable (length=2) with this hit square, making sure to add guard for water if needed
-// if no viable, go to a different hit square and try again
+// Current bugs: in hard mode, the computer will attempt to go back to a hit ship after a sink, as it should
+// either an error will occur(infinite loop) OR multiple turns will occur
 
 // // Additional features planned
 // Allow player to place ships on their own if they choose, or it can be random
@@ -67,6 +64,7 @@ let playerSunk = false;
 let dxdySave = false;
 let keepGoing = false;
 let initialBoard = true;
+let trigger = false;
 
 class Board {
     constructor() {
@@ -156,9 +154,6 @@ function render() {
 
 function renderBoards() {
     // clear all tiles and ships or update board
-    // How can I get a triangle at the start and back of the ship?
-    // check adjacent ships when the 'triangle' class is added (will be changed to 'triangle')
-    // 
     $playerSquares.forEach(sqr => {
         let coords = getXY(sqr, $playerSquares);
         let boardValue = playerBoard.board[coords.x][coords.y];
@@ -533,10 +528,45 @@ function handleTurn(evt) {
 }
 
 function aiTurn() {
-    if(aiSunk > 0) {
+    if(aiSunk > 0 && aiSunk !== false) {
         aiHit = false;
         aiSunk = false;
         dxdySave = false;
+        if(hardMode) {
+            // if aiSunk = true, loop over ships array to see if there is another hit somewhere
+            // if there is, go back to one of those hit squares 
+            // check for viable (length=2) with this hit square, making sure to add guard for water if needed
+            // if no viable, go to a different hit square and try again
+            for(let ship = 0; ship < playerBoard.ships.length; ship++) {
+                let negative = 0;
+                let positive = 0;
+                for(let segment = 0; segment < playerBoard.ships[ship].length; segment++) {
+                    if(playerBoard.ships[ship][segment] === 1) {
+                        positive += 1;
+                    }
+                    else {
+                        negative += 1;
+                    }
+                    if(positive > 0 && negative > 0) {
+                        // here we have a hit we need to go back to
+                        // scan board for -1*(shipIdx+1)
+                        // set this location as new savedX and savedY(and aiHitX/aiHitY), set aiHit = true
+                        for(let x in playerBoard.board) {
+                            for(let y in playerBoard.board[x]) {
+                                if(playerBoard.board[x][y] === -1*(ship+1)) {
+                                    savedX = parseInt(x);
+                                    aiHitX = parseInt(x);
+                                    savedY = parseInt(y);
+                                    aiHitY = parseInt(y);
+                                    aiHit = true;
+                                    return aiTurn();
+                                }
+                            }
+                        }   
+                    }
+                }
+            }
+        }
     }
     if(hardMode) {
         // if hit occurs in one direction, keep going
@@ -632,7 +662,6 @@ function aiTurn() {
             aiHitY = newCoords.y;
             dxdySave = dxdy;
             checkSunk(newCoords.x, newCoords.y, playerBoard.board, playerBoard.ships, 'ai');
-            return;
         }
         else {
             playerBoard.board[newCoords.x][newCoords.y] = null;
@@ -661,19 +690,21 @@ function aiTurn() {
 
 
 function checkSunk(x, y, board, ships, turn) {
-    let shipIdx = -1*board[x][y] - 1;
-    ships[shipIdx].every((segment, idx) => {
+    let shipIdx = -1*(board[x][y]+1);
+
+    for(let idx in ships[shipIdx]) {
         if(ships[shipIdx][idx] === 1) {
             ships[shipIdx][idx] = -1;
             // check for better way to keep track of this
             turn === 'player' ? playerTotalHits += 1 : aiTotalHits += 1;
-            return false;
+            break;
         }
         else if(ships[shipIdx][idx] === -1) {
             turn === 'player' ? playerTotalHits += 1 : aiTotalHits += 1;
-            return true;
+            continue;
         }
-    });
+    }
+    
     if(turn === 'player') {
         if(playerTotalHits === ships[shipIdx].length) {
             // player sunk ship
