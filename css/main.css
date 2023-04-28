@@ -10,9 +10,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-image: url("/images/oceanwaves.png");
     background-color: lightskyblue;
-    background-size: cover;
 }
 
 header {
