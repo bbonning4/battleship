@@ -4,8 +4,8 @@
 
 body {
     height: 100vh;
-    /* margin: ; */
-    /* font-family: */
+    font-family: 'Bruno Ace SC', cursive;
+    margin-top: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -14,13 +14,15 @@ body {
 }
 
 header {
-    margin: -5vh 0 3vh 0;
+    margin: 0 0 2vmin 0;
     font-size: 4vmin;
 }
 
 #msg {
     text-align: center;
+    font-size: 3vmin;
 }
+
 
 #ai-board {
     display: grid;
@@ -45,8 +47,8 @@ header {
 
 #ai-board > div:hover {
     background-color: lightblue !important;
-    /* background: var(--div-bg-color); */
 }
+
 
 #player-board {
     display: grid;
@@ -70,7 +72,6 @@ header {
 
 #player-board > div:hover {
     background: lightblue;
-    /* background: var(--div-bg-color); */
 }
 
 

@@ -1,7 +1,3 @@
-// // Additional features planned
-// Allow player to place ships on their own if they choose, or it can be random
-// Have a frame of ships that will display hits/sinks as they occur
-
 /*----- constants -----*/
 const TILES = {
     'null': 'white !important',
@@ -61,8 +57,6 @@ let playerHit = false;
 let playerSunk = false;
 let dxdySave = false;
 let keepGoing = false;
-let initialBoard = true;
-let trigger = false;
 
 class Board {
     constructor() {
@@ -138,7 +132,6 @@ function init() {
     playerSunk = false;
     dxdySave = false;
     keepGoing = false;
-    initialBoard = true;
     gameStart = false;
     createBoards()
     placeShips(playerBoard, $playerSquares)
@@ -285,21 +278,14 @@ function placeShips(board, squares) {
                         'x': ogX - RANDOM_DIRECTION[dxdy][0],
                         'y': ogY - RANDOM_DIRECTION[dxdy][1] 
                     }
-                    if(newCoords.x >= 0 && newCoords.x < 10 &&
-                       newCoords.y >= 0 && newCoords.y < 10) {
-                        if(board.board[newCoords.x][newCoords.y] === 0) {
-                            board.board[newCoords.x][newCoords.y] = shipIdx+1;
-                            board.ships[shipIdx][idx] = 1;       
-                            ogX = newCoords.x;
-                            ogY = newCoords.y;
-                            goBack = true;
-                            segments += 1;
-                            return;
-                        }
-                    }
-                    else {
-                        // shouldn't reach this point
-                        return console.log('Error: Ship segment not placed');
+                    if(checkGuards(newCoords.x, newCoords.y, board.board)) {    
+                        board.board[newCoords.x][newCoords.y] = shipIdx+1;
+                        board.ships[shipIdx][idx] = 1;       
+                        ogX = newCoords.x;
+                        ogY = newCoords.y;
+                        goBack = true;
+                        segments += 1;
+                        return;              
                     }
                 }
 
@@ -308,8 +294,7 @@ function placeShips(board, squares) {
                     'y': y + RANDOM_DIRECTION[dxdy][1]
                 }
 
-                if (newCoords.x >= 0 && newCoords.x < 10 &&
-                    newCoords.y >= 0 && newCoords.y < 10) {
+                if(checkWallGuards(newCoords.x, newCoords.y)) {
                         if(board.board[newCoords.x][newCoords.y] === 0) {
                             board.board[newCoords.x][newCoords.y] = shipIdx+1;
                             board.ships[shipIdx][idx] = 1;
@@ -320,26 +305,18 @@ function placeShips(board, squares) {
                         }
                         // on board but a ship blocking path
                         else {
-                            // already confirmed viable so no guards needed here
                             newCoords = {
                                 'x': ogX - RANDOM_DIRECTION[dxdy][0],
                                 'y': ogY - RANDOM_DIRECTION[dxdy][1] 
                             }
-                            if(newCoords.x >= 0 && newCoords.x < 10 &&
-                               newCoords.y >= 0 && newCoords.y < 10) {
-                                if(board.board[newCoords.x][newCoords.y] === 0) {
-                                    board.board[newCoords.x][newCoords.y] = shipIdx+1;
-                                    board.ships[shipIdx][idx] = 1;
-                                    ogX = newCoords.x;
-                                    ogY = newCoords.y;
-                                    goBack = true;
-                                    segments += 1;
-                                    return;
-                                }
-                            }
-                            else {
-                                // shouldn't reach this point
-                                return console.log('Error: Ship segment not placed');
+                            if(checkGuards(newCoords.x, newCoords.y, board.board)) {
+                                board.board[newCoords.x][newCoords.y] = shipIdx+1;
+                                board.ships[shipIdx][idx] = 1;
+                                ogX = newCoords.x;
+                                ogY = newCoords.y;
+                                goBack = true;
+                                segments += 1;
+                                return;   
                             }
                         }
                 }
@@ -365,36 +342,28 @@ function placeShips(board, squares) {
                         'x': ogX - RANDOM_DIRECTION[dxdy][0],
                         'y': ogY - RANDOM_DIRECTION[dxdy][1] 
                     }
-                    if(newCoords.x >= 0 && newCoords.x < 10 &&
-                       newCoords.y >= 0 && newCoords.y < 10) {
-                        if(board.board[newCoords.x][newCoords.y] === 0) {
-                            board.board[newCoords.x][newCoords.y] = shipIdx+1;
-                            board.ships[shipIdx][idx] = 1;
-                            ogX = newCoords.x;
-                            ogY = newCoords.y;
-                            goBack = true;
-                            segments += 1;
-                            return;
-                        }
-                    }
-                    else {
-                        // shouldn't reach this point
-                        return console.log('Error: Ship segment not placed');
+                    if(checkGuards(newCoords.x, newCoords.y, board.board)) {
+                        board.board[newCoords.x][newCoords.y] = shipIdx+1;
+                        board.ships[shipIdx][idx] = 1;
+                        ogX = newCoords.x;
+                        ogY = newCoords.y;
+                        goBack = true;
+                        segments += 1;
+                        return; 
                     }
                 }
 
                 // randomise one of the 4 directions the next segment can go
-                dxdy = Math.floor(Math.random() * 4)
+                dxdy = Math.floor(Math.random() * 4);
                 // check if direction is viable
                 if(checkViablePlace(x, y, ship.length, board, dxdy) === false) {
-                    return place(segment, idx)
+                    return place(segment, idx);
                 }
                 newCoords = {
                     'x': x + RANDOM_DIRECTION[dxdy][0],
                     'y': y + RANDOM_DIRECTION[dxdy][1]
                 }
-                if (newCoords.x >= 0 && newCoords.x < 10 &&
-                    newCoords.y >= 0 && newCoords.y < 10) {
+                if(checkWallGuards(newCoords.x, newCoords.y)) {
                         if(board.board[newCoords.x][newCoords.y] === 0) {
                             board.board[newCoords.x][newCoords.y] = shipIdx+1;
                             board.ships[shipIdx][idx] = 1;
@@ -405,11 +374,11 @@ function placeShips(board, squares) {
                         }
                         else {
                             goBack = true;
-                            return place(segment, idx)
+                            return place(segment, idx);
                         }
                     }
                 else {
-                    return place(segment, idx)
+                    return place(segment, idx);
                 }
             }
 
@@ -434,7 +403,6 @@ function placeShips(board, squares) {
             }
         })
     })
-    initialBoard = false;
     render();
 }
 
@@ -692,7 +660,6 @@ function checkSunk(x, y, board, ships, turn) {
     for(let idx in ships[shipIdx]) {
         if(ships[shipIdx][idx] === 1) {
             ships[shipIdx][idx] = -1;
-            // check for better way to keep track of this
             turn === 'player' ? playerTotalHits += 1 : aiTotalHits += 1;
             break;
         }
@@ -751,6 +718,7 @@ function getWinner() {
     }
 }
 
+
 function getXY(evt, $squares) {
     let x;
     let y;
@@ -788,5 +756,32 @@ function checkTriangleDirection(x, y, board, value, sqr) {
             // point down
             $(sqr).addClass('triangle-down');
         }
+    }
+}
+
+
+function checkWallGuards(x, y) {
+    if(x >= 0 && x < 10 &&
+       y >= 0 && y < 10) {
+        return true;
+       }
+    else {
+        return false;
+    }
+}
+
+
+function checkGuards(x, y, board) {
+    if(x >= 0 && x < 10 &&
+       y >= 0 && y < 10) {
+            if(board[x][y] === 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    else {
+        return false;
     }
 }

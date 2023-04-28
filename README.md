@@ -5,7 +5,7 @@ hitting each other's board.  The first player to "sink" all of the other players
 
 This game incorporates JavaScript, HTML, CSS, and JQuery.
 
-![screenshot](images/battleship_screenshot.png)
+![screenshot](images/screenshot.png)
 
 
 ## Getting Started
@@ -21,3 +21,4 @@ To play, simply shuffle the board until you like the positions of your ships, th
 
 - Add option for player to build their own board
 - Add a ships frame to have another visual of what ships are remaining
+- Make the AI even smarter!
