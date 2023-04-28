@@ -633,22 +633,17 @@ function aiTurn() {
         let y = Math.floor(Math.random() * 10)
         // logic to prevent shooting a random square where a ship can't be located
         if(hardMode) {
-            let breakLoop = false;
+            let length = false;
             for(let ship = 0; ship < playerBoard.ships.length; ship++) {
                 for(let segment = 0; segment < playerBoard.ships[ship].length; segment++) {
                     if(playerBoard.ships[ship][segment] === 1) {
-                        if(checkViablePlace(x, y, playerBoard.ships[ship].length, playerBoard, null, true) === false) {
-                            return aiTurn();
-                        }
-                        else {
-                            breakLoop = true;
-                            break;
-                        }
+                        length = playerBoard.ships[ship].length
                     }
                 }
-                if(breakLoop) {
-                    break;
-                }
+            }
+            console.log(length);
+            if(length && checkViablePlace(x, y, length, playerBoard, null, true) === false) {
+                return aiTurn();
             }
         }
 
