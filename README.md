@@ -15,6 +15,13 @@ Click [here](https://bbonning4.github.io/battleship/) to preview the game!
 
 To play, simply shuffle the board until you like the positions of your ships, then fire away!  Click the opponent's board to take a shot.  The square will turn white for a miss, and red for a hit!  The opponent has the same ships you do, just layed out differently.  Use that information to defeat the opponent!  Also feel free to enable hard mode by clicking the button, which will stay lit red while enabled.  On hard mode, the AI is more advanced so will take out your ships more quickly! 
 
+Ship sizes:
+Patrol boat -2
+Submaraine  -3
+Destroyer   -3
+Battleship  -4
+Carrier     -5
+
 
 ## Next Steps
 

@@ -10,12 +10,17 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: lightskyblue;
+    /* background-color: lightskyblue; */
+    background-image: url("/images/oceanwaves.png");
+    background-size: cover;
 }
 
 header {
     margin: 0 0 2vmin 0;
+    padding-left: 1vmin;
+    padding-right: 1vmin;
     font-size: 4vmin;
+    background: lightskyblue;
 }
 
 #msg {
