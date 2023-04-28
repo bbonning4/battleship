@@ -407,12 +407,12 @@ function placeShips(board, squares) {
 }
 
 
-function checkViablePlace(x, y, length, board, dxdy) {
+function checkViablePlace(x, y, length, board, dxdy, hardModeCheck) {
     let left = 0;
     let right = 0;
     let up = 0;
     let down = 0;
-    if(aiHit === true) {
+    if(aiHit === true || hardModeCheck === true) {
         // used for checking aiHits
         for(let i = 1; i < length; i++) {
             if(x - i >= 0 && x - i < 10 && left === i - 1) {
@@ -521,6 +521,8 @@ function aiTurn() {
                                 if(playerBoard.board[x][y] === -1*(ship+1)) {
                                     aiHitX = parseInt(x);
                                     aiHitY = parseInt(y);
+                                    savedX = parseInt(x);
+                                    savedY = parseInt(y);
                                     aiHit = true;
                                     return aiTurn();
                                 }
@@ -639,7 +641,7 @@ function aiTurn() {
             for(let ship = 0; ship < playerBoard.ships.length; ship++) {
                 for(let segment = 0; segment < playerBoard.ships[ship].length; segment++) {
                     if(playerBoard.ships[ship][segment] === 1) {
-                        if(checkViablePlace(x, y, playerBoard.ships[ship].length, playerBoard, null) === false) {
+                        if(checkViablePlace(x, y, playerBoard.ships[ship].length, playerBoard, null, true) === false) {
                             return aiTurn();
                         }
                         else {
