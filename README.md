@@ -17,7 +17,7 @@ To play, simply shuffle the board until you like the positions of your ships, th
 
 Ship sizes:
 Patrol boat -2
-Submaraine  -3
+Submarine   -3
 Destroyer   -3
 Battleship  -4
 Carrier     -5

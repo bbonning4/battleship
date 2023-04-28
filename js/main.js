@@ -98,7 +98,6 @@ const $playerSquares = $('#player-board > div').toArray();
 const $aiSquares = $('#ai-board > div').toArray();
 
 /*----- event listeners -----*/
-// $('#player-board').on('click', 'div', placeShips)
 $('#ai-board').on('click', 'div', handleTurn)
 $resetBtn.on('click', init)
 $hardModeBtn.on('click', enableHardMode)
@@ -196,7 +195,6 @@ function renderBoards() {
         }
     })
 }
-
 
 function renderMessage() {
     if(winner) {
@@ -406,7 +404,6 @@ function placeShips(board, squares) {
     render();
 }
 
-
 function checkViablePlace(x, y, length, board, dxdy, hardModeCheck) {
     let left = 0;
     let right = 0;
@@ -472,7 +469,6 @@ function checkViablePlace(x, y, length, board, dxdy, hardModeCheck) {
         return false;
     }
 }
-
 
 function handleTurn(evt) {
     gameStart = true;
@@ -674,7 +670,6 @@ function aiTurn() {
     }
 }
 
-
 function checkSunk(x, y, board, ships, turn) {
     let shipIdx = -1*(board[x][y]+1);
 
@@ -714,7 +709,6 @@ function checkSunk(x, y, board, ships, turn) {
     }
 }
 
-
 function getWinner() {
     let playerHasShip = false;
     let aiHasShip = false;
@@ -739,7 +733,6 @@ function getWinner() {
     }
 }
 
-
 function getXY(evt, $squares) {
     let x;
     let y;
@@ -751,7 +744,6 @@ function getXY(evt, $squares) {
     y = Math.floor(sqrIdx/10);
     return {'x':x, 'y':y};
 }
-
 
 function checkTriangleDirection(x, y, board, value, sqr) {
     if(x + 1 >= 0 && x + 1 < 10) {
@@ -780,7 +772,6 @@ function checkTriangleDirection(x, y, board, value, sqr) {
     }
 }
 
-
 function checkWallGuards(x, y) {
     if(x >= 0 && x < 10 &&
        y >= 0 && y < 10) {
@@ -790,7 +781,6 @@ function checkWallGuards(x, y) {
         return false;
     }
 }
-
 
 function checkGuards(x, y, board) {
     if(x >= 0 && x < 10 &&
